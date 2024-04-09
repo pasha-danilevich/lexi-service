@@ -11,8 +11,6 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
-# Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -20,6 +18,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    'apps.api',
+    'apps.user'
 ]
 
 MIDDLEWARE = [
@@ -58,8 +59,13 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'read-recall',
+        'USER': 'postgres',
+        'PASSWORD': '4682',
+        'PORT': '5432',
+        # 'HOST': '192.168.1.43', not working
+        'HOST': '127.0.0.1',
     }
 }
 
