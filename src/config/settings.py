@@ -23,9 +23,10 @@ INSTALLED_APPS = [
     'apps.api',
     'apps.user',
     'apps.book',
+    'apps.word',
+    'apps.training',
     
     'rest_framework',
-    
     'djoser',
 ]
 
