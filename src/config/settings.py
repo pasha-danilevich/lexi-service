@@ -22,9 +22,9 @@ INSTALLED_APPS = [
     
     'apps.api',
     'apps.user',
+    'apps.book',
     
     'rest_framework',
-    'rest_framework.authtoken',
     
     'djoser',
 ]
@@ -98,7 +98,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
 TIME_ZONE = 'UTC'
 
@@ -118,11 +118,11 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# AUTH
+# AUTH 
 
-# AUTH_USER_MODEL = 'apps.user.User'
+AUTH_USER_MODEL = 'user.User'
 # AUTHENTICATION_BACKENDS = ('apps.user.backends.AuthBackend',)
-
+ 
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
