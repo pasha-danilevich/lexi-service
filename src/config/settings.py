@@ -5,7 +5,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure--v2ki54-tod(@cxcft#cxf7m8hy1rv5b9!!@d_tvxkhhy!h3_&'
-
+API_VERSION = 'v1'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -133,7 +133,7 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     # кол-во дней для того
     # чтобы зайти без пароля
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=7),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=1),
     # после этого времени пароль обязателен
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
     # при запросе на обновление токена, ЕСЛИ False, будет 
@@ -174,6 +174,9 @@ DJOSER = {
     'ACTIVATION_URL': '#/activate/{uid}/{token}', # так будет выглядить url в писме на почту
     
     'TOKEN_MODEL': None, # we use only JWT (and migrate --fake)
+    'SERIALIZERS': {
+        'current_user': f'apps.api.{API_VERSION}.user.serializers.ProfileSerializer'
+        },
 }
 
 # EMAIL
