@@ -21,10 +21,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
     'apps.api',
+    
     'apps.user',
     'apps.book',
     'apps.word',
-    'apps.training',
     
     'rest_framework',
     'djoser',
