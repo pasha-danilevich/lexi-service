@@ -5,7 +5,7 @@ from django.db import models
 class Book(models.Model):
     title = models.CharField('title', max_length=255, blank=False)
     author = models.CharField('author', max_length=255, blank=False)
-    page_count = models.IntegerField('page count', blank=False)
+    page_count = models.IntegerField('page_count', blank=False)
     author_upload = models.ForeignKey(
         'user.User', 
         related_name='author_upload', 

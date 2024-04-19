@@ -11,3 +11,6 @@ __pycache__/
 *.py[cod]
 db.sqlite3
 media
+.vscode/settings.json
+src/config/__pycache__/settings.cpython-311.pyc
+src/config/__pycache__/settings.cpython-311.pyc
