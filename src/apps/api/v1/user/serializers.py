@@ -1,9 +1,28 @@
 from rest_framework import serializers
 
-from apps.book.models import Book
 from apps.user.models import User, UserBookRelation
 from apps.word.models import UserWordRelation, Word
 
+from djoser.serializers import UserCreateMixin, UserCreatePasswordRetypeSerializer
+from django.db import transaction
+from django.contrib.auth import get_user_model
+from djoser.conf import settings
+from django.contrib.auth.password_validation import validate_password
+from rest_framework.settings import api_settings
+from django.core import exceptions as django_exceptions
+
+User = get_user_model()
+
+class CustomUserCreateMixin(UserCreateMixin):
+    def perform_create(self, validated_data):
+        with transaction.atomic():
+            user = User.objects.create_user(**validated_data)
+            user.is_active = True
+            user.save(update_fields=["is_active"])
+            return user
+
+class CustomUserCreatePasswordRetypeSerializer(CustomUserCreateMixin, UserCreatePasswordRetypeSerializer):
+    pass
 
 def _get_quantity(cls, field, value):
     return cls.objects.filter(**{field: value}).count()

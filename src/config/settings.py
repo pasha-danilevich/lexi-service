@@ -172,8 +172,9 @@ DJOSER = {
     'SEND_CONFIRMATION_EMAIL': True,
     'ACTIVATION_URL': 'api/users/activation/{uid}/{token}', # так будет выглядить url в писме на почту
     
-    'TOKEN_MODEL': None, # we use only JWT (and migrate --fake)
+    'TOKEN_MODEL': None, # we use only JWT 
     'SERIALIZERS': {
+        'user_create_password_retype': f'apps.api.{API_VERSION}.user.serializers.CustomUserCreatePasswordRetypeSerializer',
         'current_user': f'apps.api.{API_VERSION}.user.serializers.ProfileSerializer'
         },
 }
