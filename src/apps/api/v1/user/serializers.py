@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from apps.book.models import Book
 from apps.user.models import User, UserBookRelation
 from apps.word.models import UserWordRelation, Word
 
@@ -34,7 +35,7 @@ def _get_list_words(queryset):
         }
         for word in queryset
     ]
-  
+
 class ProfileSerializer(serializers.ModelSerializer):
     upload_book = serializers.SerializerMethodField()
     studied_word = serializers.SerializerMethodField()
@@ -55,10 +56,17 @@ class ProfileSerializer(serializers.ModelSerializer):
         return _get_list_words(queryset_new_word)
     
 class BookmarkSerliazer(serializers.ModelSerializer):
-    # title = serializers.SerializerMethodField()
-    # author = serializers.SerializerMethodField()
+    title = serializers.SerializerMethodField()
+    author = serializers.SerializerMethodField()
     
     class Meta:
         model = UserBookRelation
-        fields = ['target_page']
-        
+        fields = ['title', 'author', 'target_page']
+    
+    def get_title(self, obj):
+        book = Book.objects.get(id=obj.book_id)
+        return book.__dict__['title']
+    
+    def get_author(self, obj):
+        book = Book.objects.get(id=obj.book_id)
+        return book.__dict__['author']

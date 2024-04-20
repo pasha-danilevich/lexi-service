@@ -12,16 +12,16 @@ from rest_framework.decorators import action
 
 
 class BookmarkList(generics.ListAPIView):
-    queryset = UserBookRelation.objects.all()
+    
 
     serializer_class = BookmarkSerliazer
     permission_classes = [IsAuthenticated]
-    
+
     def list(self, request, *args, **kwargs):
-        # lst = super().list(request, *args, **kwargs)
-        print(request.auth)
-        print(request.user)
-        return Response('lsdj')
+        
+        queryset = UserBookRelation.objects.filter(user_id = request.user.id)
+        serializer = BookmarkSerliazer(queryset, many=True)
+        return Response(serializer.data)
     
 class UserActivate(UserViewSet):
     
