@@ -1,6 +1,9 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
+
 from apps.user.models import UserBookRelation
 from apps.api.v1.user.serializers import BookmarkSerliazer
 
@@ -8,20 +11,17 @@ from djoser.views import UserViewSet
 from djoser import signals
 from djoser.conf import settings
 from djoser.compat import get_user_email
-from rest_framework.decorators import action
 
 
 class BookmarkList(generics.ListAPIView):
     
-
     serializer_class = BookmarkSerliazer
     permission_classes = [IsAuthenticated]
-
-    def list(self, request, *args, **kwargs):
-        
-        queryset = UserBookRelation.objects.filter(user_id = request.user.id)
-        serializer = BookmarkSerliazer(queryset, many=True)
-        return Response(serializer.data)
+    pagination_class = PageNumberPagination
+    
+    def get_queryset(self):
+        return UserBookRelation.objects.filter(user_id=self.request.user.id)
+    
     
 class UserActivate(UserViewSet):
     

@@ -127,12 +127,15 @@ AUTH_USER_MODEL = 'user.User'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication'
-    ]
+    ],
+    
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 2
 }
 SIMPLE_JWT = {
     # кол-во дней для того
     # чтобы зайти без пароля
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=7),
     # после этого времени пароль обязателен
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
     # при запросе на обновление токена, ЕСЛИ False, будет 
