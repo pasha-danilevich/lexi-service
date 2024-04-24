@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 
 from .pagination import BookmarkPageNumberPagination
 from apps.user.models import UserBookRelation
-from .serializers import BookmarkSerliazer
+from .serializers import BookmarkSerializer
 
 from djoser.views import UserViewSet
 from djoser import signals
@@ -15,7 +15,7 @@ from djoser.compat import get_user_email
 
 class BookmarkList(generics.ListAPIView):
     
-    serializer_class = BookmarkSerliazer
+    serializer_class = BookmarkSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = BookmarkPageNumberPagination
     
