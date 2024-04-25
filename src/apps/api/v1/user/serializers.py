@@ -63,7 +63,7 @@ class BookmarkSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = UserBookRelation
-        fields = ['pk','book', 'target_page']
+        fields = ['pk', 'book', 'target_page']
         
     def get_book(self, obj):
         book_serializer = BookSerializer(obj.book)
