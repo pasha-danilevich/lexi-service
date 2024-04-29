@@ -2,6 +2,9 @@ from django.db import models
 from django.utils.text import slugify
 from .utils import transliterate
 
+def book_default():
+    return None
+
 class Book(models.Model):
     title = models.CharField('title', max_length=255, blank=False)
     author = models.CharField('author', max_length=255, blank=True)
@@ -13,6 +16,7 @@ class Book(models.Model):
         on_delete=models.SET_NULL, 
         null=True
         )
+    book = models.JSONField(default=book_default, null=False)
     
     def __str__(self) -> str:
         return self.title
