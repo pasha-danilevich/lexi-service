@@ -169,18 +169,18 @@ def _make_page(lines_generator):
         yield page
             
 
-def json_to_book(json: dict):
+def json_to_book(text: str):
     """
     Преобразует JSON с книгой в список страниц.
     
     Args:
-        json (dict): JSON с книгой.
+        text (str): json srtingify текст книги.
     
     Returns:
         list: Список страниц, представляющих книгу.
     """
     book = []
-    lines_generator = _make_lines(json['book'])
+    lines_generator = _make_lines(text)
     pages_generator = _make_page(lines_generator)
     for page in pages_generator:
         book.append(page)
