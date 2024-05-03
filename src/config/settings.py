@@ -1,6 +1,12 @@
 from datetime import timedelta
 from pathlib import Path
 
+def p(text, green=True):
+    if green:
+        print(f"\033[32m{text}\033[0m")
+    else:
+        print(f'\033[31m{text}\033[0m')
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure--v2ki54-tod(@cxcft#cxf7m8hy1rv5b9!!@d_tvxkhhy!h3_&'
