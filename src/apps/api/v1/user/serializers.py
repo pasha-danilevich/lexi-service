@@ -59,16 +59,21 @@ class ProfileSerializer(serializers.ModelSerializer):
     
 class BookmarkSerializer(serializers.ModelSerializer):
 
-    book = serializers.SerializerMethodField()
+    book_cover = serializers.SerializerMethodField()
     
     class Meta:
         model = UserBookRelation
-        fields = ['pk', 'book', 'target_page']
+        fields = ['pk', 'book_cover', 'target_page']
+        extra_kwargs = {'book_cover': {'read_only': True}}
         
-    def get_book(self, obj):
+    def get_book_cover(self, obj):
         book_serializer = BookSerializer(obj.book)
         book_data = book_serializer.data
-        book_data.pop('page_count')
-        return book_data
+        data = {
+            "title": book_data['title'],
+            "author": book_data['author'],
+            "slug": book_data['slug'],
+        }
+        return data
 
 

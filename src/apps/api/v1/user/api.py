@@ -3,8 +3,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 
-from .pagination import BookmarkPageNumberPagination
 from apps.user.models import UserBookRelation
+from apps.book.models import Book
+from .pagination import BookmarkPageNumberPagination
 from .serializers import BookmarkSerializer
 
 from djoser.views import UserViewSet
@@ -13,15 +14,29 @@ from djoser.conf import settings
 from djoser.compat import get_user_email
 
 
-class BookmarkList(generics.ListAPIView):
+class BookmarkListCreate(generics.ListCreateAPIView):
     
     serializer_class = BookmarkSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = BookmarkPageNumberPagination
     
     def get_queryset(self):
-        return UserBookRelation.objects.filter(user_id=self.request.user.id)
+        return UserBookRelation.objects.filter(user_id=self.request.user.id).order_by('-id')
     
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        book = Book.objects.get(id=request.data['book_id'])
+        target_page = request.data['target_page']
+        
+        UserBookRelation.objects.update_or_create(
+            user=user,
+            book=book,
+            defaults={
+                'target_page': target_page
+            }
+        )
+
+        return Response('f')
     
 class UserActivate(UserViewSet):
     
