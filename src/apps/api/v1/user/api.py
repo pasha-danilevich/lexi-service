@@ -1,4 +1,4 @@
-from rest_framework import generics, status
+from rest_framework import generics, status, mixins
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
@@ -14,7 +14,7 @@ from djoser.conf import settings
 from djoser.compat import get_user_email
 
 
-class BookmarkListCreate(generics.ListCreateAPIView):
+class BookmarkListCreate(generics.ListCreateAPIView, mixins.DestroyModelMixin):
     
     serializer_class = BookmarkSerializer
     permission_classes = [IsAuthenticated]
@@ -36,7 +36,17 @@ class BookmarkListCreate(generics.ListCreateAPIView):
             }
         )
 
-        return Response('f')
+        return Response(status=status.HTTP_200_OK)
+    
+    # def delete(self, request, *args, **kwargs):
+    #     instance = UserBookRelation.objects.get(id=request.data['pk'])
+    #     print(instance)
+    #     return super().destroy(request, *args, **kwargs)
+    
+class BookmarkDestroy(generics.DestroyAPIView):
+    queryset = UserBookRelation.objects.all()
+    serializer_class = BookmarkSerializer
+    permission_classes = [IsAuthenticated]
     
 class UserActivate(UserViewSet):
     
