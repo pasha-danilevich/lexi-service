@@ -7,6 +7,10 @@ def p(text, green=True):
     else:
         print(f'\033[31m{text}\033[0m')
 
+def print_local_var(locals):
+    for var, value in locals.items():
+        print(f'{var} = {value}') 
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure--v2ki54-tod(@cxcft#cxf7m8hy1rv5b9!!@d_tvxkhhy!h3_&'
