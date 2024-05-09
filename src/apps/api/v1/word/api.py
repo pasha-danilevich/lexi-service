@@ -1,7 +1,12 @@
+import inspect
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
+
 from apps.api.v1.word.serializers import WordSerializer, Word
+from config.settings import print_local_var
+from .yandex_dictionary import fetch_word_data
+
 
 class WordCreate(generics.GenericAPIView, mixins.CreateModelMixin):
     queryset = Word.objects.all()
@@ -15,14 +20,19 @@ class WordCreate(generics.GenericAPIView, mixins.CreateModelMixin):
         except Word.DoesNotExist:
             return None
         
-    
     def post(self, request, *args, **kwargs):
-        lookup_value = self.request.data['text']
-        instance = self.get_object(lookup_value)
+        request_word = self.request.data['word']
+        word = fetch_word_data(request_word)
+        instance = self.get_object(request_word)
         
+
         if instance:
             serializer = self.get_serializer(instance)
             return Response(serializer.data)
         else:
-            return super().create(request, *args, **kwargs)
+            serializer = self.get_serializer(data=word)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
