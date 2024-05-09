@@ -7,7 +7,7 @@ class WordSerializer(serializers.ModelSerializer):
         fields = [
             'pk', 
             'text', 
-            'path', 
+            'part', 
             'transcription', 
             'translation'
             ]
