@@ -6,6 +6,7 @@ from rest_framework.exceptions import NotFound
 from apps.api.v1.word.serializers import WordSerializer, Word
 from config.settings import print_local_var
 from .yandex_dictionary import fetch_word_data
+from .utils import clean_string
 
 
 class WordCreate(generics.GenericAPIView, mixins.CreateModelMixin):
@@ -21,18 +22,21 @@ class WordCreate(generics.GenericAPIView, mixins.CreateModelMixin):
             return None
         
     def post(self, request, *args, **kwargs):
-        request_word = self.request.data['word']
-        word = fetch_word_data(request_word)
+        request_word = clean_string(self.request.data.get('word', ''))
+
+        if not request_word:
+            return Response(data='Слово не передано', status=status.HTTP_400_BAD_REQUEST)
+
         instance = self.get_object(request_word)
-        
 
         if instance:
             serializer = self.get_serializer(instance)
             return Response(serializer.data)
-        else:
-            serializer = self.get_serializer(data=word)
-            serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
-            headers = self.get_success_headers(serializer.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
+        word_dict = fetch_word_data(request_word)
+
+        if word_dict:
+            request.data.update(word_dict)
+            return super().create(request, *args, **kwargs)
+
+        return Response(data='Объект не найден и нет данных о слове', status=status.HTTP_400_BAD_REQUEST)
