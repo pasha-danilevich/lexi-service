@@ -124,7 +124,3 @@ def json_to_book(json: dict):
         return book
 
     
-print(json_to_book(json))
-# print(txt_to_book(path=path))
-
-

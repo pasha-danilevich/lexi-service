@@ -2,15 +2,6 @@ from django.db import models
 
 # Create your models here.
 
-PART_OF_SPEECH = {
-    "noun": "существительное",
-    "verb": "глагол",
-    "adjective": "прилагательное",
-    "adverb": "наречие",
-    "preposition": "предлог",
-    "conjunction": "союз",
-    "interjection": "междометие"
-}
 TRIANING_TYPE = {
     "RC": "recognize",
     "RP": "reproduction "
@@ -18,14 +9,10 @@ TRIANING_TYPE = {
 
 class Word(models.Model):
     text = models.CharField("text", max_length=50, blank=False)
-    part = models.CharField(
-        "part", 
-        max_length=12, 
-        choices=PART_OF_SPEECH, 
-        blank=True
-        )
+    part = models.CharField("part", max_length=50, blank=True)
     transcription = models.CharField("transcription", max_length=50, blank=True)
     translation = models.CharField("translation", max_length=50, blank=False)
+    synonym = models.JSONField("synonym", null=True, blank=True)
     
     def __str__(self) -> str:
         return f'{self.text} - {self.translation}'
