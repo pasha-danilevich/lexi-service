@@ -9,7 +9,7 @@ from apps.book.models import Book
 # from users_app.managers import UserManager
 def settings_default():
     data = {
-        "dark-theme": False,
+        "dark_theme": False,
         "levels": [1, 3, 5, 7, 11]
     }
     return data
@@ -31,7 +31,7 @@ class User(AbstractUser):
     class Meta:
         verbose_name = 'user'
         verbose_name_plural = 'users'
-        unique_together = ('username', 'email')
+        unique_together = ('username', 'email',)
         
     # def email_user(self, subject, message, from_email=None, **kwargs):
     #     """Send an email to this user."""

@@ -3,15 +3,18 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 
-from apps.user.models import UserBookRelation
-from apps.book.models import Book
-from .pagination import BookmarkPageNumberPagination
-from .serializers import BookmarkSerializer
-
 from djoser.views import UserViewSet
 from djoser import signals
 from djoser.conf import settings
 from djoser.compat import get_user_email
+
+from apps.user.models import UserBookRelation, User
+from apps.book.models import Book
+
+from .pagination import BookmarkPageNumberPagination
+from .serializers import BookmarkSerializer, SettingsSerializer, SettingsDictionarySerializer
+
+
 
 
 class BookmarkListCreate(generics.ListCreateAPIView, mixins.DestroyModelMixin):
@@ -38,10 +41,6 @@ class BookmarkListCreate(generics.ListCreateAPIView, mixins.DestroyModelMixin):
 
         return Response(status=status.HTTP_200_OK)
     
-    # def delete(self, request, *args, **kwargs):
-    #     instance = UserBookRelation.objects.get(id=request.data['pk'])
-    #     print(instance)
-    #     return super().destroy(request, *args, **kwargs)
     
 class BookmarkDestroy(generics.DestroyAPIView):
     queryset = UserBookRelation.objects.all()
@@ -68,3 +67,32 @@ class UserActivate(UserViewSet):
             settings.EMAIL.confirmation(self.request, context).send(to)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    
+class UserSettings(generics.GenericAPIView):
+
+    serializer_class = SettingsSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_user(self):
+        return self.request.user
+    
+    def get(self, request, *args, **kwargs):
+        user = self.get_user()
+        serializer = self.get_serializer(user)
+        return Response(serializer.data)
+    
+class UserSettingsDictionary(UserSettings):
+    serializer_class = SettingsDictionarySerializer
+    
+    
+    def put(self, request, *args, **kwargs):
+        user = self.get_user()
+        new_levels = self.request.data
+        
+        user.settings['levels'] = new_levels
+        user.save()
+        
+        return Response(status=status.HTTP_200_OK)
+    
+    

@@ -45,7 +45,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'upload_book', 'studied_word', 'new_word', 'settings']
+        fields = ['username', 'upload_book', 'studied_word', 'new_word']
 
     def get_upload_book(self, obj):
         return _get_quantity(UserBookRelation, 'user_id', obj.id)
@@ -54,7 +54,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         return _get_quantity(UserWord, 'user_id', obj.id)
 
     def get_new_word(self, obj):
-        queryset_new_word = UserWord.objects.filter(user_id=obj.id)[:7]
+        queryset_new_word = UserWord.objects.filter(user_id=obj.id).order_by('-id')[:7]
         return _get_list_words(queryset_new_word)
     
 class BookmarkSerializer(serializers.ModelSerializer):
@@ -76,4 +76,21 @@ class BookmarkSerializer(serializers.ModelSerializer):
         }
         return data
 
+class SettingsSerializer(serializers.ModelSerializer):
+    dark_theme = serializers.SerializerMethodField()
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'activated_email', 'dark_theme']
 
+    def get_dark_theme(self, obj):
+        return obj.settings['dark_theme']
+    
+class SettingsDictionarySerializer(serializers.ModelSerializer):
+    levels = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = User
+        fields = ['levels']
+        
+    def get_levels(self, obj):
+        return obj.settings['levels']
