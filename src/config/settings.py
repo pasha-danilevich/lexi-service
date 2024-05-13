@@ -10,6 +10,7 @@ def p(text, green=True):
 def print_local_var(locals):
     for var, value in locals.items():
         print(f'{var} = {value}') 
+    print('-----------------------------')
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 

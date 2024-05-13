@@ -1,8 +1,15 @@
 from apps.user.models import UserBookRelation, User
 from apps.book.models import Book
+from apps.word.models import UserWord
 
-from config.settings import p
+from config.settings import p, print_local_var
 from django.test import TestCase
+
+
+user = User.objects.get(id=1)
+levels_length = user.settings.get('levels').__len__()
+
+
 
 def create_books(count, user):
     for i in range(count):
@@ -69,7 +76,8 @@ class TestStringMethods(TestCase):
 
 
         
-        p(UserBookRelation.objects.all())
+        # p(UserBookRelation.objects.all())
 
+        
 
 
