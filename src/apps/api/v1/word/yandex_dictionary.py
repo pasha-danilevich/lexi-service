@@ -16,11 +16,15 @@ def fetch_word_data(text):
     
     if not response.status_code == 200:
         return None
-        
-    json_data = response.json()  
+    
+    json_data = response.json() 
+    
+    if not json_data['def']:
+        return None, None
+     
     word = extract_word_data(json_data)
 
-    return word
+    return word, json_data
     
         
 def extract_word_data(json_data: dict) -> dict:
@@ -33,29 +37,25 @@ def extract_word_data(json_data: dict) -> dict:
     Returns:
         dict: Словарь с данными о слове.
     """
-    if not json_data['def']:
-        return None
     
     word = json_data['def'][0]
     translation = word['tr'][0]
+    synonyms_list = make_synonyms_list(translation.get('syn', None))
     
     data = {
-        "text": word['text'],
-        "part": word['pos'],
-        "transcription": word['ts'],
-        "translation": translation['text'],
-        "synonym": get_synonym(translation)
+        "text": word.get('text'),
+        "part": word.get('pos'),
+        "transcription": word.get('ts'),
+        "translation": translation.get('text'),
+        "synonym": synonyms_list
     }
     return convert_dict_value_to_lowercase(data) 
 
 
-def get_synonym(translation: dict) -> list:
-
-    synonyms_words = translation.get('syn', None)
-    if not synonyms_words:
+def make_synonyms_list(synonyms: dict) -> list:
+    if not synonyms:
         return None
-    
-    synonyms_list = [word['text'].lower() for word in synonyms_words]
+    synonyms_list = [word['text'].lower() for word in synonyms]
     return synonyms_list
 
 def convert_dict_value_to_lowercase(input_dict):
