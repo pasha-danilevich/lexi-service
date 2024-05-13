@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 
 from apps.api.v1.book.serializers import BookSerializer
 from apps.user.models import User, UserBookRelation
-from apps.word.models import UserWordRelation, Word
+from apps.word.models import UserWord, Word
 
 from djoser.serializers import UserCreateMixin, UserCreatePasswordRetypeSerializer
 
@@ -51,10 +51,10 @@ class ProfileSerializer(serializers.ModelSerializer):
         return _get_quantity(UserBookRelation, 'user_id', obj.id)
 
     def get_studied_word(self, obj):
-        return _get_quantity(UserWordRelation, 'user_id', obj.id)
+        return _get_quantity(UserWord, 'user_id', obj.id)
 
     def get_new_word(self, obj):
-        queryset_new_word = UserWordRelation.objects.filter(user_id=obj.id)[:7]
+        queryset_new_word = UserWord.objects.filter(user_id=obj.id)[:7]
         return _get_list_words(queryset_new_word)
     
 class BookmarkSerializer(serializers.ModelSerializer):
