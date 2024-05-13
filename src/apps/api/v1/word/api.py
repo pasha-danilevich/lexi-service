@@ -14,12 +14,6 @@ class WordCreate(generics.GenericAPIView, mixins.CreateModelMixin):
     serializer_class = WordSerializer
     lookup_field = 'text'
     
-    def get_object(self, lookup_value: str):
-        try:
-            instance = self.queryset.get(**{self.lookup_field: lookup_value})
-            return instance
-        except Word.DoesNotExist:
-            return None
         
     def post(self, request, *args, **kwargs):
         request_word = clean_string(self.request.data.get('word', ''))
@@ -27,16 +21,25 @@ class WordCreate(generics.GenericAPIView, mixins.CreateModelMixin):
         if not request_word:
             return Response(data='Слово не передано', status=status.HTTP_400_BAD_REQUEST)
 
-        instance = self.get_object(request_word)
+        word_dict, fetch_response = fetch_word_data(request_word)
+        if not fetch_response:
+            return Response(data='Объект не найден и нет данных о слове', status=status.HTTP_400_BAD_REQUEST)
+        
+        fetch_response.update({'is_related_exists': False})
+        
+        word, created = Word.objects.get_or_create(
+            text=request_word,
+            defaults={**word_dict}
+        ) 
+        
+        fetch_response.update(
+            {
+                'is_related_exists': word.user_related_with_word.exists(),
+                'word_id': word.id
+                }
+            )
+        
+        return Response(fetch_response, status=status.HTTP_200_OK)
 
-        if instance:
-            serializer = self.get_serializer(instance)
-            return Response(serializer.data)
 
-        word_dict = fetch_word_data(request_word)
-
-        if word_dict:
-            request.data.update(word_dict)
-            return super().create(request, *args, **kwargs)
-
-        return Response(data='Объект не найден и нет данных о слове', status=status.HTTP_400_BAD_REQUEST)
+        
