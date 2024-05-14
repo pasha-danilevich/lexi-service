@@ -1,6 +1,6 @@
 from apps.user.models import UserBookRelation, User
 from apps.book.models import Book
-from apps.word.models import UserWord
+from apps.word.models import UserWord, Word
 
 from config.settings import p, print_local_var
 from django.test import TestCase
@@ -8,8 +8,8 @@ from django.test import TestCase
 
 user = User.objects.get(id=1)
 levels_length = user.settings.get('levels').__len__()
-
-
+user_word = UserWord.objects.filter(user_id = user.id)
+word = Word.objects.get(text='hello')
 
 def create_books(count, user):
     for i in range(count):
@@ -20,6 +20,16 @@ def create_books(count, user):
             slug='example-book',
             author_upload=user,
             book='text'  
+        )
+
+def create_users(count):
+    for i in range(count):
+        user = User.objects.create(
+            username='example_user' + f'{i}',
+            email='example@example.com' + f'{i}',
+            password='strongpassword',
+            is_active=True,
+            activated_email=True,
         )
         
 class TestStringMethods(TestCase):
@@ -73,7 +83,14 @@ class TestStringMethods(TestCase):
                 "target_page": 145
                 }
         )
-
+    def test_is_related_user(self):
+        create_users(4)
+        
+        # uw = user_word.word_related_with_user.all()
+        wu = word.user_related_with_word.all()
+        
+        print_local_var(locals=locals())
+        # word = 
 
         
         # p(UserBookRelation.objects.all())
