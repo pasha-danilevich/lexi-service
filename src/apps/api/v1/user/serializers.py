@@ -9,12 +9,20 @@ from apps.api.v1.book.serializers import BookSerializer
 from apps.user.models import User, UserBookRelation
 from apps.word.models import UserWord, Word
 
-from djoser.serializers import UserCreateMixin, UserCreatePasswordRetypeSerializer
+from djoser.serializers import UidAndTokenSerializer, UserCreateMixin, UserCreatePasswordRetypeSerializer
 
-
+from config import settings
 
 
 User = get_user_model()
+
+
+class CustomActivationSerializer(UidAndTokenSerializer):
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        return attrs
+
 
 class CustomUserCreateMixin(UserCreateMixin):
     def perform_create(self, validated_data):
@@ -24,19 +32,23 @@ class CustomUserCreateMixin(UserCreateMixin):
             user.save(update_fields=["is_active"])
             return user
 
+
 class CustomUserCreatePasswordRetypeSerializer(CustomUserCreateMixin, UserCreatePasswordRetypeSerializer):
     pass
+
 
 def _get_quantity(cls, field, value):
     return cls.objects.filter(**{field: value}).count()
 
+
 def _get_list_words(queryset):
     return [{
-        "text": Word.objects.get(id=word.word_id).text, 
+        "text": Word.objects.get(id=word.word_id).text,
         "translation": Word.objects.get(id=word.word_id).translation
-        }
+    }
         for word in queryset
     ]
+
 
 class ProfileSerializer(serializers.ModelSerializer):
     upload_book = serializers.SerializerMethodField()
@@ -54,18 +66,20 @@ class ProfileSerializer(serializers.ModelSerializer):
         return _get_quantity(UserWord, 'user_id', obj.id)
 
     def get_new_word(self, obj):
-        queryset_new_word = UserWord.objects.filter(user_id=obj.id).order_by('-id')[:7]
+        queryset_new_word = UserWord.objects.filter(
+            user_id=obj.id).order_by('-id')[:7]
         return _get_list_words(queryset_new_word)
-    
+
+
 class BookmarkSerializer(serializers.ModelSerializer):
 
     book_cover = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = UserBookRelation
         fields = ['pk', 'book_cover', 'target_page']
         extra_kwargs = {'book_cover': {'read_only': True}}
-        
+
     def get_book_cover(self, obj):
         book_serializer = BookSerializer(obj.book)
         book_data = book_serializer.data
@@ -76,21 +90,24 @@ class BookmarkSerializer(serializers.ModelSerializer):
         }
         return data
 
+
 class SettingsSerializer(serializers.ModelSerializer):
     dark_theme = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = ['username', 'email', 'activated_email', 'dark_theme']
 
     def get_dark_theme(self, obj):
         return obj.settings['dark_theme']
-    
+
+
 class SettingsDictionarySerializer(serializers.ModelSerializer):
     levels = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = User
         fields = ['levels']
-        
+
     def get_levels(self, obj):
         return obj.settings['levels']

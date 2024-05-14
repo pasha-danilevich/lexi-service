@@ -3,10 +3,14 @@ from .api import *
 
 urlpatterns = [
     path('settings/', UserSettings.as_view(), name='settings'),
-    path('settings/dictionary-levels/', UserSettingsDictionary.as_view(), name='settings-dictionary-levels'),
-    
+    path('settings/dictionary-levels/', UserSettingsDictionary.as_view(),
+         name='settings-dictionary-levels'),
+
     path('bookmarks/', BookmarkListCreate.as_view(), name='bookmark-list'),
     path('bookmarks/<int:pk>', BookmarkDestroy.as_view(), name='bookmark-delete'),
-    
-    path("activation/<str:uid>/<str:token>/", UserActivate.as_view({"post": "activation"}), name="activate")
-] 
+
+    path("activation/<str:uid>/<str:token>/",
+         UserActivate.as_view({"post": "activation"}), name="activate"),
+    path("resend_activation/",
+         UserActivate.as_view({"post": "resend_activation"}), name="resend_activation")
+]
