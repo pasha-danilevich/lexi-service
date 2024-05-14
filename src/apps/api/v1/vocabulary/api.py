@@ -13,33 +13,40 @@ class Vocabulary(generics.GenericAPIView):
     serializer_class = UserWordSerializer
     permission_classes = (IsAuthenticated, )
     pagination_class = None
-    
-    def get_queryset(self):
-        queryset = self.queryset.filter(user_id = self.request.user.id)
+
+    def get_user_queryset(self):
+        queryset = self.queryset.filter(user_id=self.request.user.id)
         return queryset
 
+
 class VocabularyListCreate(generics.ListCreateAPIView, Vocabulary):
-    
-    
+
     def create(self, request, *args, **kwargs):
         request_user_id = self.request.user.id
         request_word_id = self.request.data.get('word')
-        
+
         self.request.data.update({'user': request_user_id})
 
         return super().create(request, *args, **kwargs)
-        
+
 
 class VocabularyStats(generics.ListAPIView, Vocabulary):
-    
-    def list(self, request, *args, **kwargs):
+
+    def get_value(self, type):
         user = self.request.user
         levels_length = user.settings.get('levels').__len__()
- 
-        data = {
-            'recognize': get_words_count_on_levels('recognize_lvl', levels_length, self.queryset),
-            'reproduce':get_words_count_on_levels('reproduce_lvl', levels_length, self.queryset)
-        }
+
+        user_words_queryset = self.get_user_queryset()
+        value = get_words_count_on_levels(
+            type=type + '_lvl',
+            levels_length=levels_length,
+            queryset=user_words_queryset
+        )
+        return value
+
+    def list(self, request, *args, **kwargs):
+
+        types = ('recognize', 'reproduce', )
+        data = {type: self.get_value(type) for type in types}
+
         return Response(data, status=status.HTTP_200_OK)
-    
-    
