@@ -48,9 +48,9 @@ class Meaning(models.Model):
 
 
 class UserWord(models.Model):
-    user = models.ForeignKey("user.User", related_name='related_words',
+    user = models.ForeignKey("user.User", related_name='words',
                              on_delete=models.CASCADE, blank=False, null=False)
-    word = models.ForeignKey("word.Word", related_name='related_users',
+    word = models.ForeignKey("word.Word", related_name='users',
                              on_delete=models.CASCADE, blank=False, null=False)
 
     recognize_lvl = models.IntegerField("recognize_lvl", default=1, null=False)
