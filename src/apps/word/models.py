@@ -3,19 +3,48 @@ from django.db import models
 from .utils import get_current_unix_time
 
 
-from config.settings import print_local_var
 
 
 class Word(models.Model):
-    text = models.CharField("text", max_length=50, blank=False, unique=True)
-    part = models.CharField("part", max_length=50, blank=True)
-    transcription = models.CharField(
-        "transcription", max_length=50, blank=True)
-    translation = models.CharField("translation", max_length=50, blank=False)
-    synonym = models.JSONField("synonym", null=True, blank=True)
+    text = models.CharField(max_length=100)
+    part_of_speech = models.CharField(max_length=100, null=True, blank=True)  # Часть речи
+    transcription = models.CharField(max_length=100, null=True, blank=True)  # Транскрипция
 
-    def __str__(self) -> str:
-        return f'{self.text} - {self.translation}'
+    def __str__(self):
+        return self.text
+
+
+class Translation(models.Model):
+    word = models.ForeignKey(
+        Word, on_delete=models.CASCADE, related_name='translations')
+    text = models.CharField(max_length=100)
+    part_of_speech = models.CharField(max_length=100, null=True, blank=True)  # Часть речи
+    gender = models.CharField(max_length=2, null=True, blank=True)  # Род
+    frequency = models.IntegerField(null=True, blank=True)  # Частота использования
+
+    def __str__(self):
+        return self.text
+
+
+class Synonym(models.Model):
+    translation = models.ForeignKey(
+        Word, on_delete=models.CASCADE, related_name='synonyms')
+    text = models.CharField(max_length=100)
+    part_of_speech = models.CharField(max_length=100, null=True, blank=True)  # Часть речи
+    gender = models.CharField(max_length=2, null=True, blank=True)  # Род
+    frequency = models.IntegerField(null=True, blank=True)  # Частота использования
+
+    def __str__(self):
+        return self.text
+
+
+class Meaning(models.Model):
+    translation = models.ForeignKey(
+        Word, on_delete=models.CASCADE, related_name='meanings')
+    text = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.text
 
 
 class UserWord(models.Model):
