@@ -23,4 +23,4 @@ class WordSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Word
-        fields = ['text', 'part_of_speech', 'transcription', 'translations', 'synonyms', 'meanings']
+        fields = ['pk', 'text', 'part_of_speech', 'transcription', 'translations', 'synonyms', 'meanings']
