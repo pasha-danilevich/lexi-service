@@ -27,7 +27,7 @@ class Translation(models.Model):
 
 
 class Synonym(models.Model):
-    translation = models.ForeignKey(
+    word = models.ForeignKey(
         Word, on_delete=models.CASCADE, related_name='synonyms')
     text = models.CharField(max_length=100)
     part_of_speech = models.CharField(max_length=100, null=True, blank=True)  # Часть речи
@@ -39,7 +39,7 @@ class Synonym(models.Model):
 
 
 class Meaning(models.Model):
-    translation = models.ForeignKey(
+    word = models.ForeignKey(
         Word, on_delete=models.CASCADE, related_name='meanings')
     text = models.CharField(max_length=100)
 
