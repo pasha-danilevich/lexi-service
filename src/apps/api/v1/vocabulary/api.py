@@ -21,7 +21,7 @@ class Vocabulary(generics.GenericAPIView):
             return UserWordListSerializer
         return self.serializer_class
     
-    def get_user_queryset(self):
+    def get_queryset(self):
         queryset = self.queryset.filter(user_id=self.request.user.id)
         return queryset
 
@@ -45,7 +45,7 @@ class VocabularyStats(generics.ListAPIView, Vocabulary):
         user = self.request.user
         levels_length = user.settings.get('levels').__len__()
 
-        user_words_queryset = self.get_user_queryset()
+        user_words_queryset = self.get_queryset()
         value = get_words_count_on_levels(
             type=type + '_lvl',
             levels_length=levels_length,
