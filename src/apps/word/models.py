@@ -3,12 +3,12 @@ from django.db import models
 from .utils import get_current_unix_time
 
 
-
-
 class Word(models.Model):
     text = models.CharField(max_length=100)
-    part_of_speech = models.CharField(max_length=100, null=True, blank=True)  # Часть речи
-    transcription = models.CharField(max_length=100, null=True, blank=True)  # Транскрипция
+    part_of_speech = models.CharField(
+        max_length=100, null=True, blank=True)  # Часть речи
+    transcription = models.CharField(
+        max_length=100, null=True, blank=True)  # Транскрипция
 
     def __str__(self):
         return self.text
@@ -18,9 +18,11 @@ class Translation(models.Model):
     word = models.ForeignKey(
         Word, on_delete=models.CASCADE, related_name='translations')
     text = models.CharField(max_length=100)
-    part_of_speech = models.CharField(max_length=100, null=True, blank=True)  # Часть речи
-    gender = models.CharField(max_length=2, null=True, blank=True)  # Род
-    frequency = models.IntegerField(null=True, blank=True)  # Частота использования
+    part_of_speech = models.CharField(
+        max_length=100, null=True, blank=True)  # Часть речи
+    gender = models.CharField(max_length=10, null=True, blank=True)  # Род
+    frequency = models.IntegerField(
+        null=True, blank=True)  # Частота использования
 
     def __str__(self):
         return self.text
@@ -30,9 +32,11 @@ class Synonym(models.Model):
     word = models.ForeignKey(
         Word, on_delete=models.CASCADE, related_name='synonyms')
     text = models.CharField(max_length=100)
-    part_of_speech = models.CharField(max_length=100, null=True, blank=True)  # Часть речи
-    gender = models.CharField(max_length=2, null=True, blank=True)  # Род
-    frequency = models.IntegerField(null=True, blank=True)  # Частота использования
+    part_of_speech = models.CharField(
+        max_length=100, null=True, blank=True)  # Часть речи
+    gender = models.CharField(max_length=10, null=True, blank=True)  # Род
+    frequency = models.IntegerField(
+        null=True, blank=True)  # Частота использования
 
     def __str__(self):
         return self.text
@@ -68,10 +72,15 @@ class UserWord(models.Model):
     class Meta:
         unique_together = ('user', 'word',)
 
-    def save(self, *args, **kwargs) -> None:
+    def save(self, is_instance=False, *args, **kwargs) -> None:
+
+        if is_instance:
+            return super().save(*args, **kwargs)
+
         current_time = get_current_unix_time()
         self.recognize_time = current_time
         self.reproduce_time = current_time
+
         return super().save(*args, **kwargs)
 
     def __str__(self) -> str:
