@@ -99,13 +99,17 @@ class BookmarkSerializer(serializers.ModelSerializer):
 
 class SettingsSerializer(serializers.ModelSerializer):
     dark_theme = serializers.SerializerMethodField()
+    number_of_false_set = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'activated_email', 'dark_theme']
+        fields = ['username', 'email', 'activated_email', 'dark_theme', 'number_of_false_set']
 
     def get_dark_theme(self, obj):
         return obj.settings['dark_theme']
+    
+    def get_number_of_false_set(self, obj):
+        return obj.settings['number_of_false_set']
 
 
 class SettingsDictionarySerializer(serializers.ModelSerializer):
