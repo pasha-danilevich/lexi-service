@@ -25,37 +25,6 @@ class TrainingListUpdate(Training, generics.ListAPIView, mixins.UpdateModelMixin
             detail = 'Необходимо передать параметр type: (recognize, reproduce)'
             raise Http404(detail)
         return type
-    
-
-    def list(self, request, *args, **kwargs):
-        type = self.get_type()
-        filter_field = type + '_time' + '__lte'
-        
-        filter = {
-            filter_field: get_current_unix_time()
-        }
-
-        self.queryset = self.queryset.filter(**filter)
-        queryset = self.filter_queryset(self.get_queryset())
-        
-        if type == 'recognize':
-            
-            number_of_false_set = self.request.user.settings["number_of_false_set"]
-            kwargs = {
-                "many": True, 
-                "false_set": True, 
-                "number_of_false_set": number_of_false_set
-            }
-        elif type == 'reproduce':
-            kwargs = {"many": True}
-            
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, **kwargs)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, **kwargs)
-        return Response(serializer.data)
 
     def get_object(self):
         pk = self.request.data['pk']
@@ -68,6 +37,41 @@ class TrainingListUpdate(Training, generics.ListAPIView, mixins.UpdateModelMixin
 
         return obj
 
+    
+    def list(self, request, *args, **kwargs):
+        type = self.get_type()
+        filter_field = type + '_time' + '__lte'
+        user = self.request.user
+
+        filter = {
+            "user_id": user.id,
+            filter_field: get_current_unix_time()
+        }
+
+        self.queryset = self.queryset.filter(**filter)
+        queryset = self.filter_queryset(self.get_queryset())
+
+        if type == 'recognize':
+            number_of_false_set = user.settings["number_of_false_set"]
+            kwargs = {
+                "many": True,
+                "false_set": True,
+                "number_of_false_set": number_of_false_set
+            }
+            
+        elif type == 'reproduce':
+            kwargs = {"many": True}
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, **kwargs)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, **kwargs)
+        return Response(serializer.data)
+
+
+
     def patch(self, request, *args, **kwargs):
         type = self.get_type()
         instance = self.get_object()
@@ -77,16 +81,16 @@ class TrainingListUpdate(Training, generics.ListAPIView, mixins.UpdateModelMixin
 
         type_lvl = type + '_lvl'
         type_time = type + '_time'
-        
+
         current_lvl = getattr(instance, type_lvl)
         instance_cuttent_time = getattr(instance, type_time)
 
         if is_correct and not is_last_level(user, current_lvl):
             new_lvl = current_lvl + 1
-            
+
         elif not is_first_level(current_lvl):
             new_lvl = current_lvl - 1
-        
+
         else:
             new_lvl = current_lvl
 
