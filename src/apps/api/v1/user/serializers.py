@@ -1,17 +1,14 @@
-from rest_framework import serializers
-from rest_framework.settings import api_settings
-
 from django.db import transaction
 from django.contrib.auth import get_user_model
 
-
-from apps.api.v1.book.serializers import BookSerializer
-from apps.user.models import User, UserBookRelation
-from apps.word.models import UserWord, Word
+from rest_framework import serializers
+from rest_framework.settings import api_settings
 
 from djoser.serializers import UidAndTokenSerializer, UserCreateMixin, UserCreatePasswordRetypeSerializer
 
-from config import settings
+from apps.api.v1.book.serializers import BookSerializer
+from apps.user.models import User, UserBookRelation
+from apps.word.models import UserWord
 
 
 User = get_user_model()
@@ -31,6 +28,9 @@ class CustomUserCreateMixin(UserCreateMixin):
             user.is_active = True
             user.save(update_fields=["is_active"])
             return user
+    default_error_messages = {
+        "password_mismatch": 'Поля для ввода пароля не совпадали.'
+    }
 
 
 class CustomUserCreatePasswordRetypeSerializer(CustomUserCreateMixin, UserCreatePasswordRetypeSerializer):
@@ -42,12 +42,19 @@ def _get_quantity(cls, field, value):
 
 
 def _get_list_words(queryset):
-    return [{
-        "text": Word.objects.get(id=word.word_id).text,
-        "translation": Word.objects.get(id=word.word_id).translation
-    }
-        for word in queryset
-    ]
+    word_list = []
+    for user_word_relationship in queryset:
+        word = user_word_relationship.word
+        translation = word.translations.first()
+        obj = {
+            'text': word.text,
+            'translation': translation.text
+        }
+        
+        word_list.append(obj)
+    return word_list
+    
+
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -66,9 +73,8 @@ class ProfileSerializer(serializers.ModelSerializer):
         return _get_quantity(UserWord, 'user_id', obj.id)
 
     def get_new_word(self, obj):
-        queryset_new_word = UserWord.objects.filter(
-            user_id=obj.id).order_by('-id')[:7]
-        return _get_list_words(queryset_new_word)
+        user_words_queryset = obj.words.all()
+        return _get_list_words(user_words_queryset)
 
 
 class BookmarkSerializer(serializers.ModelSerializer):
