@@ -10,7 +10,8 @@ from apps.book.models import Book
 def settings_default():
     data = {
         "dark_theme": False,
-        "levels": [1, 3, 5, 7, 11]
+        "levels": [1, 3, 5, 7, 11],
+        "number_of_false_set": 4
     }
     return data
 
@@ -24,7 +25,7 @@ class User(AbstractUser):
     email = models.EmailField("email address", blank=False, unique=True)
     settings = models.JSONField(default=settings_default, null=False)
 
-    USERNAME_FIELD = 'username'
+    USERNAME_FIELD = "username"
     EMAIL_FIELD = "email"
 
     class Meta:

@@ -21,8 +21,6 @@ class BookListCreate(generics.ListCreateAPIView):
         request.data['book'] = book
         request.data['page_count'] = len(book)
         request.data['author_upload'] = request.user.id
-        # print(request.data)
-        # print()
         return super().post(request, *args, **kwargs)
     
 class BookRetrieve(generics.RetrieveAPIView):
