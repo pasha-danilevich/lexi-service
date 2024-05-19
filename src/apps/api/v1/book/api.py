@@ -7,7 +7,7 @@ from .pagination import BookPageNumberPagination
 from apps.book.models import Book
 from apps.book.utils import json_to_book
 
-from apps.api.v1.book.serializers import BookSerializer
+from apps.api.v1.book.serializers import BookSerializer, BookRetrieveSerializer
 
 class BookListCreate(generics.ListCreateAPIView):
     queryset = Book.objects.all().order_by('-id')
@@ -25,7 +25,7 @@ class BookListCreate(generics.ListCreateAPIView):
     
 class BookRetrieve(generics.RetrieveAPIView):
     queryset = Book.objects.all()
-    serializer_class = BookSerializer
+    serializer_class = BookRetrieveSerializer
     pagination_class = None
     permission_classes = [IsAuthenticatedOrReadOnly]
     lookup_field = 'slug'
