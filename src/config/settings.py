@@ -37,10 +37,12 @@ INSTALLED_APPS = [
     'apps.word',
     
     'rest_framework',
+    'corsheaders',
     'djoser',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -209,3 +211,11 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 PAGE_SIZE = 2000
 PENALTY_SIZE = 100
+
+
+# CORS
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3080",
+    "http://localhost:5173",
+]
