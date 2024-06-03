@@ -152,7 +152,7 @@ SIMPLE_JWT = {
     # чтобы зайти без пароля
     "ACCESS_TOKEN_LIFETIME": timedelta(days=7),
     # после этого времени пароль обязателен
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=60),
     # при запросе на обновление токена, ЕСЛИ False, будет 
     # возвращен только новый access-токен 
     "ROTATE_REFRESH_TOKENS": True,
