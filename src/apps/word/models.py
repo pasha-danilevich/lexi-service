@@ -1,4 +1,3 @@
-from typing import Iterable
 from django.db import models
 from .utils import get_current_unix_time
 
