@@ -30,3 +30,12 @@ class BookRetrieve(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     lookup_field = 'slug'
     
+    def get_queryset(self):
+        slug = self.kwargs.get('slug')
+        return Book.objects.get(slug=slug)
+
+    def get(self, request, slug, page):
+        queryset = self.get_queryset()
+        serializer = BookRetrieveSerializer(queryset, page=page)
+        return Response(serializer.data)
+    
