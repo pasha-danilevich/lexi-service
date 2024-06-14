@@ -93,6 +93,7 @@ class BookmarkSerializer(serializers.ModelSerializer):
             "title": book_data['title'],
             "author": book_data['author'],
             "slug": book_data['slug'],
+            "book_id": book_data['pk']
         }
         return data
 

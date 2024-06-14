@@ -97,6 +97,7 @@ class UserSettings(generics.GenericAPIView):
 
 class UserSettingsDictionary(UserSettings):
     serializer_class = SettingsDictionarySerializer
+    permission_classes = [IsAuthenticated]
 
     def put(self, request, *args, **kwargs):
         user = self.get_user()

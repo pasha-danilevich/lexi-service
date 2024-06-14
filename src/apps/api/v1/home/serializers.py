@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.db.models import Q
 
-from apps.user.models import UserBookRelation
+from apps.book.models import Book
 from .utils import get_beginning_day, get_ending_day
 from apps.word.utils import get_current_unix_time
 
@@ -40,7 +40,7 @@ class HomeSerializer(serializers.Serializer):
                 'count_reproduce_to_learn': reproduce_queryset_words_to_learning.count(),
                 'count_recognize_to_learn': recognize_queryset_words_today.count(),
                 'new_words_today': new_words_today.count(),
-                'upload_books': UserBookRelation.objects.filter(user_id=user.id).count()
+                'upload_books': Book.objects.filter(author_upload=user.id).count()
             }
             
             self.initial_data = data
