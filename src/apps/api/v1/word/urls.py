@@ -3,5 +3,6 @@ from apps.api.v1.word.api import WordCreate
 
 urlpatterns = [
     path('', WordCreate.as_view(), name='word-create'),
+    path('<int:pk>/', WordCreate.as_view(), name='word-get')
     
 ] 

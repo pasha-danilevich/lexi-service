@@ -35,3 +35,11 @@ class WordCreate(generics.GenericAPIView, mixins.CreateModelMixin):
         }
 
         return Response(response, status=status.HTTP_200_OK)
+    
+    def get(self, request, pk, *args, **kwargs):
+        word = Word.objects.get(id=pk)
+        
+        serializer = WordSerializer(word)
+        data = serializer.data
+        print(data)
+        return Response(data, status=status.HTTP_200_OK)
