@@ -160,7 +160,7 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": False,
     "UPDATE_LAST_LOGIN": False,
 
-    'AUTH_HEADER_TYPES': ('JWT', 'Beare'),
+    'AUTH_HEADER_TYPES': ('JWT', 'Beare', 'Bearer'),
 
     "TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",
     "TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSerializer",
