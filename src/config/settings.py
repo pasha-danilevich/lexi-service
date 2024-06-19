@@ -1,5 +1,6 @@
 from datetime import timedelta
 from pathlib import Path
+from . import local_settings as local
 
 def p(text, green=True):
     if green:
@@ -79,12 +80,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'read-recall',
-        'USER': 'postgres',
-        'PASSWORD': '4682',
-        'PORT': '5432',
+        'NAME': local.NAME,
+        'USER': local.USER,
+        'PASSWORD': local.PASSWORD,
+        'PORT': local.PORT,
         # 'HOST': '192.168.1.43', not working
-        'HOST': '127.0.0.1',
+        'HOST': local.HOST,
     }
 }
 
