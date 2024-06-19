@@ -68,7 +68,7 @@ class BookRetrieveSerializer(serializers.ModelSerializer):
         ]
 
     def get_pages(self, obj):
-        page = self.page
+        page = self.page - 1
         size_page_slice = 50
 
         start = (page // size_page_slice) * size_page_slice
