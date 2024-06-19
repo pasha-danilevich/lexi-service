@@ -15,6 +15,11 @@ class BookListCreate(generics.ListCreateAPIView):
     pagination_class = BookPageNumberPagination
     permission_classes = [IsAuthenticatedOrReadOnly]
     
+    def get_serializer(self, *args, **kwargs):
+        serializer_class = self.get_serializer_class()
+        kwargs.setdefault('context', self.get_serializer_context())
+        user = self.request.user
+        return serializer_class(*args, **kwargs, user=user)
     
     def post(self, request, *args, **kwargs):
         book = json_to_book(request.data['book'])
@@ -36,6 +41,7 @@ class BookRetrieve(generics.RetrieveAPIView):
 
     def get(self, request, slug, page):
         queryset = self.get_queryset()
-        serializer = BookRetrieveSerializer(queryset, page=page)
+        user = self.request.user
+        serializer = BookRetrieveSerializer(queryset, page=page, user=user)
         return Response(serializer.data)
     
