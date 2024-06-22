@@ -9,7 +9,7 @@ def fetch_word_data(text):
         'key': 'dict.1.1.20240401T142057Z.dca24aa264de304c.6a1ba247e07408be736f729f72b1fe4d3d7e51cc',
         'lang': 'en-ru',
         'text': text,
-        'ui': 'en',
+        'ui': 'ru',
         # 'flag': 2
     }
 
