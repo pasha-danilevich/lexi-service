@@ -99,26 +99,19 @@ class BookmarkSerializer(serializers.ModelSerializer):
 
 
 class SettingsSerializer(serializers.ModelSerializer):
-    dark_theme = serializers.SerializerMethodField()
-    number_of_false_set = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ['username', 'email', 'activated_email', 'dark_theme', 'number_of_false_set']
-
-    def get_dark_theme(self, obj):
-        return obj.settings['dark_theme']
-    
-    def get_number_of_false_set(self, obj):
-        return obj.settings['number_of_false_set']
+        fields = ['username', 'email', 'activated_email', 'settings']
 
 
-class SettingsDictionarySerializer(serializers.ModelSerializer):
-    levels = serializers.SerializerMethodField()
+    def update(self, instance, validated_data):
+        # Обновляем поля пользователя
 
-    class Meta:
-        model = User
-        fields = ['levels']
+        instance.username = validated_data.get('username', instance.username)
+        instance.email = validated_data.get('email', instance.email)
+        instance.activated_email = validated_data.get('activated_email', instance.activated_email)
+        instance.settings = validated_data.get('settings', instance.settings)
 
-    def get_levels(self, obj):
-        return obj.settings['levels']
+        instance.save()
+        return instance

@@ -13,7 +13,7 @@ from apps.user.models import UserBookRelation, User
 from apps.book.models import Book
 
 from .pagination import BookmarkPageNumberPagination
-from .serializers import BookmarkSerializer, SettingsSerializer, SettingsDictionarySerializer
+from .serializers import BookmarkSerializer, SettingsSerializer
 
 
 class BookmarkListCreate(generics.ListCreateAPIView, mixins.DestroyModelMixin):
@@ -81,29 +81,20 @@ class UserActivate(UserViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class UserSettings(generics.GenericAPIView):
+class UserSettings(generics.GenericAPIView, mixins.UpdateModelMixin):
 
     serializer_class = SettingsSerializer
     permission_classes = [IsAuthenticated]
 
-    def get_user(self):
-        return self.request.user
-
     def get(self, request, *args, **kwargs):
-        user = self.get_user()
+        user = self.request.user
         serializer = self.get_serializer(user)
         return Response(serializer.data)
-
-
-class UserSettingsDictionary(UserSettings):
-    serializer_class = SettingsDictionarySerializer
-    permission_classes = [IsAuthenticated]
-
+    
     def put(self, request, *args, **kwargs):
-        user = self.get_user()
-        new_levels = self.request.data
-
-        user.settings['levels'] = new_levels
-        user.save()
-
-        return Response(status=status.HTTP_200_OK)
+        instance = self.request.user
+        print(request.data)
+        serializer = self.get_serializer(instance, data=request.data, partial=False)
+        serializer.is_valid(raise_exception=False)
+        self.perform_update(serializer)
+        return Response(serializer.data)
