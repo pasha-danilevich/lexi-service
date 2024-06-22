@@ -10,7 +10,7 @@ from .serializers import HomeSerializer
 
 
 class HomeView(generics.GenericAPIView):
-    queryset = UserWord.objects.all()
+    queryset = UserWord.objects.all().order_by('-id')
     permission_classes = (IsAuthenticated, )
     
     def get_queryset(self):

@@ -194,7 +194,6 @@ DJOSER = {
     'SERIALIZERS': {
         'activation':  f'apps.api.{API_VERSION}.user.serializers.CustomActivationSerializer',
         'user_create_password_retype': f'apps.api.{API_VERSION}.user.serializers.CustomUserCreatePasswordRetypeSerializer',
-        'current_user': f'apps.api.{API_VERSION}.user.serializers.ProfileSerializer'
         },
 }
 
