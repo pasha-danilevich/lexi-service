@@ -5,13 +5,17 @@ from apps.book.models import Book
 from .utils import get_beginning_day, get_ending_day
 from apps.word.utils import get_current_unix_time
 
+from django.utils.timezone import localtime
+
 def _get_list_words(queryset):
     word_list = []
     for user_word_relationship in queryset:
-        word = user_word_relationship.word
-        # translation = word.translations.first()
+        user_word = user_word_relationship.word
+        # translation = user_word.translations.first()
+        print(user_word_relationship.date_added)
         obj = {
-            'text': word.text,
+            'text': user_word.text,
+            'date_added': user_word_relationship.date_added
             # 'translation': translation.text
         }
         
