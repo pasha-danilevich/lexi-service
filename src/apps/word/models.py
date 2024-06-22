@@ -67,6 +67,7 @@ class UserWord(models.Model):
         "reproduce_time",
         null=False
     )
+    date_added = models.DateTimeField("дата добавления", auto_now_add=True)
 
     class Meta:
         unique_together = ('user', 'word',)
