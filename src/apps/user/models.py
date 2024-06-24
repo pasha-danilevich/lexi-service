@@ -11,7 +11,8 @@ def settings_default():
     data = {
         "dark_theme": False,
         "levels": [1, 3, 5, 7, 11],
-        "number_of_false_set": 4
+        "number_of_false_set": 4,
+        "count_word_in_round": 10
     }
     return data
 

@@ -9,6 +9,7 @@ from apps.word.utils import get_current_unix_time
 from apps.api.v1.vocabulary.serializers import UserWord
 from .serializers import TrainingWordListSerializer
 
+
 class Training(generics.GenericAPIView):
     queryset = UserWord.objects.all()
     serializer_class = TrainingWordListSerializer
@@ -36,18 +37,18 @@ class TrainingListUpdate(Training, generics.ListAPIView, mixins.UpdateModelMixin
 
         return obj
 
-    
     def list(self, request, *args, **kwargs):
         type = self.get_type()
-        filter_field = type + '_time' + '__lte'
         user = self.request.user
+        filter_field = type + '_time' + '__lte'
+        count_word_in_round = user.settings["count_word_in_round"]
+        
 
         filter = {
             "user_id": user.id,
             filter_field: get_current_unix_time()
         }
-        # почему тут два queryset???
-        self.queryset = self.queryset.filter(**filter)
+        self.queryset = self.queryset.filter(**filter)[:count_word_in_round]
 
         if type == 'recognize':
             number_of_false_set = user.settings["number_of_false_set"]
@@ -56,19 +57,11 @@ class TrainingListUpdate(Training, generics.ListAPIView, mixins.UpdateModelMixin
                 "false_set": True,
                 "number_of_false_set": number_of_false_set
             }
-            
         elif type == 'reproduce':
             kwargs = {"many": True}
 
-        page = self.paginate_queryset(self.queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, **kwargs)
-            return self.get_paginated_response(serializer.data)
-
         serializer = self.get_serializer(self.queryset, **kwargs)
         return Response(serializer.data)
-
-
 
     def patch(self, request, *args, **kwargs):
         type = self.get_type()
