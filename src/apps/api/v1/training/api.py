@@ -48,7 +48,6 @@ class TrainingListUpdate(Training, generics.ListAPIView, mixins.UpdateModelMixin
         }
         # почему тут два queryset???
         self.queryset = self.queryset.filter(**filter)
-        queryset = self.filter_queryset(self.get_queryset())
 
         if type == 'recognize':
             number_of_false_set = user.settings["number_of_false_set"]
@@ -61,12 +60,12 @@ class TrainingListUpdate(Training, generics.ListAPIView, mixins.UpdateModelMixin
         elif type == 'reproduce':
             kwargs = {"many": True}
 
-        page = self.paginate_queryset(queryset)
+        page = self.paginate_queryset(self.queryset)
         if page is not None:
             serializer = self.get_serializer(page, **kwargs)
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, **kwargs)
+        serializer = self.get_serializer(self.queryset, **kwargs)
         return Response(serializer.data)
 
 
