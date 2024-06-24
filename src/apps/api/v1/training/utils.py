@@ -44,11 +44,11 @@ class StaticFileContextManager:
 
 def convert_part_of_speech(part_of_speech: str):
     part_set = {
-        'verb': 'vb',
+        'глагол': 'vb',
         'noun phrase': 'np',
-        'noun': 'nn',
-        'adverb': 'adv',
-        'adjective': 'adj',
+        'существительное': 'nn',
+        'наречие': 'adv',
+        'прилагательное': 'adj',
         'mix': 'mix'
     }
     part_of_speech = part_set.get(part_of_speech)
