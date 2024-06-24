@@ -1,3 +1,4 @@
+from typing import Any
 from django.http import Http404
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
@@ -16,15 +17,32 @@ class Training(generics.GenericAPIView):
     permission_classes = (IsAuthenticated, )
     pagination_class = None
 
-
-class TrainingListUpdate(Training, generics.ListAPIView, mixins.UpdateModelMixin):
+    def __init__(self, **kwargs: Any) -> None:
+        self.types = ['recognize', 'reproduce']
+        super().__init__(**kwargs)
 
     def get_type(self):
         type = self.request.GET.get('type')
         if not type:
-            detail = 'Необходимо передать параметр type: (recognize, reproduce)'
+            detail = f'Необходимо передать параметр type: {self.types}'
+            raise Http404(detail)
+        elif type not in self.types:
+            detail = f'Неизвестный тип: {type} Необходимо передать параметр type: {self.types}'
             raise Http404(detail)
         return type
+    
+    def create_filte(self, type: str ):
+        # Формируем имя поля фильтрации для текущего типа тренировки
+        filter_field = type + '_time' + '__lte'
+        # Создаем фильтр для поиска тренировок
+        filter = {
+            "user_id": self.request.user.id,
+            filter_field: get_current_unix_time()
+        }
+        return filter
+
+
+class TrainingListUpdate(Training, generics.ListAPIView, mixins.UpdateModelMixin):
 
     def get_object(self):
         pk = self.request.data['pk']
@@ -40,14 +58,9 @@ class TrainingListUpdate(Training, generics.ListAPIView, mixins.UpdateModelMixin
     def list(self, request, *args, **kwargs):
         type = self.get_type()
         user = self.request.user
-        filter_field = type + '_time' + '__lte'
+        filter = self.create_filte(type=type)
         count_word_in_round = user.settings["count_word_in_round"]
         
-
-        filter = {
-            "user_id": user.id,
-            filter_field: get_current_unix_time()
-        }
         self.queryset = self.queryset.filter(**filter)[:count_word_in_round]
 
         if type == 'recognize':
@@ -92,3 +105,22 @@ class TrainingListUpdate(Training, generics.ListAPIView, mixins.UpdateModelMixin
         instance.save(is_instance=True)
 
         return Response(status=status.HTTP_200_OK)
+
+
+class TrainingInfo(Training):
+    def get(self, request, *args, **kwargs):
+        data = {}
+
+        # Проходимся по всем типам тренировок
+        for type in self.types:
+            filter = self.create_filte(type)
+            # Считаем количество тренировок для текущего типа
+            count_word_to_training_recognize = self.queryset.filter(
+                **filter).count()
+
+            # Добавляем данные в словарь
+            data.update(
+                {f'count_word_to_training_{type}': count_word_to_training_recognize}
+            )
+
+        return Response(status=status.HTTP_200_OK, data=data)
