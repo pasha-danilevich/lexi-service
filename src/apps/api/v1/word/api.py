@@ -41,5 +41,4 @@ class WordCreate(generics.GenericAPIView, mixins.CreateModelMixin):
         
         serializer = WordSerializer(word)
         data = serializer.data
-        print(data)
         return Response(data, status=status.HTTP_200_OK)

@@ -93,7 +93,6 @@ class UserSettings(generics.GenericAPIView, mixins.UpdateModelMixin):
     
     def put(self, request, *args, **kwargs):
         instance = self.request.user
-        print(request.data)
         serializer = self.get_serializer(instance, data=request.data, partial=False)
         serializer.is_valid(raise_exception=False)
         self.perform_update(serializer)

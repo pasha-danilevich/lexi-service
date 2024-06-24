@@ -11,12 +11,9 @@ def _get_list_words(queryset):
     word_list = []
     for user_word_relationship in queryset:
         user_word = user_word_relationship.word
-        # translation = user_word.translations.first()
-        print(user_word_relationship.date_added)
         obj = {
             'text': user_word.text,
             'date_added': user_word_relationship.date_added
-            # 'translation': translation.text
         }
         
         word_list.append(obj)

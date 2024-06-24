@@ -155,5 +155,3 @@ def convert_dict_value_to_lowercase(input_dict):
 
     return result
 
-
-# print(fetch_word_data('get'))
