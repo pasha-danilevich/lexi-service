@@ -1,18 +1,17 @@
-import inspect
 from django.http import Http404
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
-from .utils import get_false_set, get_time_on_lvl, is_last_level, is_first_level
+from .utils import get_time_on_lvl, is_last_level, is_first_level
 from apps.word.utils import get_current_unix_time
-from config.settings import print_local_var
-from apps.api.v1.vocabulary.serializers import UserWord, UserWordSerializer, UserWordListSerializer
 
+from apps.api.v1.vocabulary.serializers import UserWord
+from .serializers import TrainingWordListSerializer
 
 class Training(generics.GenericAPIView):
     queryset = UserWord.objects.all()
-    serializer_class = UserWordListSerializer
+    serializer_class = TrainingWordListSerializer
     permission_classes = (IsAuthenticated, )
     pagination_class = None
 
@@ -47,7 +46,7 @@ class TrainingListUpdate(Training, generics.ListAPIView, mixins.UpdateModelMixin
             "user_id": user.id,
             filter_field: get_current_unix_time()
         }
-
+        # почему тут два queryset???
         self.queryset = self.queryset.filter(**filter)
         queryset = self.filter_queryset(self.get_queryset())
 
@@ -83,18 +82,17 @@ class TrainingListUpdate(Training, generics.ListAPIView, mixins.UpdateModelMixin
         type_time = type + '_time'
 
         current_lvl = getattr(instance, type_lvl)
-        instance_cuttent_time = getattr(instance, type_time)
+        # instance_cuttent_time = getattr(instance, type_time)
 
         if is_correct and not is_last_level(user, current_lvl):
             new_lvl = current_lvl + 1
-
         elif not is_first_level(current_lvl):
             new_lvl = current_lvl - 1
-
         else:
+            # остается на прежднем уровне (1й или последний)
             new_lvl = current_lvl
 
-        new_time = instance_cuttent_time + get_time_on_lvl(user, new_lvl)
+        new_time = get_current_unix_time() + get_time_on_lvl(user, new_lvl)
 
         setattr(instance, type_lvl, new_lvl)
         setattr(instance, type_time, new_time)
