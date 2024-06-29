@@ -7,14 +7,11 @@ from apps.book.models import Book
 
 # from django.core.mail import send_mail
 # from users_app.managers import UserManager
-def settings_default():
-    data = {
-        "dark_theme": False,
-        "levels": [1, 3, 5, 7, 11],
-        "number_of_false_set": 4,
-        "count_word_in_round": 10
-    }
-    return data
+def levels_default():
+    return [1, 3, 5, 7, 11]
+
+
+
 
 
 class User(AbstractUser):
@@ -24,7 +21,6 @@ class User(AbstractUser):
     is_active = models.BooleanField("active", default=True)
     activated_email = models.BooleanField("activated_email", default=False)
     email = models.EmailField("email address", blank=False, unique=True)
-    settings = models.JSONField(default=settings_default, null=False)
 
     USERNAME_FIELD = "username"
     EMAIL_FIELD = "email"
@@ -32,8 +28,16 @@ class User(AbstractUser):
     class Meta:
         verbose_name = 'user'
         verbose_name_plural = 'users'
-        unique_together = ('username', 'email',)
+        unique_together = ('username', 'email',)  
 
+
+class Settings(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='settings')
+    levels = models.JSONField(default=levels_default, null=False)
+    dark_theme = models.BooleanField(default=False, null=False)
+    count_word_in_round = models.IntegerField(default=10, null=False)
+    number_of_false_set = models.IntegerField(default=3, null=False)
+    time_to_view_result = models.IntegerField(default=1000, null=False)
 
 class UserBookRelation(models.Model):
     user = models.ForeignKey(
@@ -44,3 +48,15 @@ class UserBookRelation(models.Model):
 
     def __str__(self) -> str:
         return f"User: {self.user} left a bookmark {self.target_page}. Book: {self.book} "
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=User)
+def create_settings(sender, instance, created, **kwargs):
+    if created:
+        Settings.objects.create(user=instance)
+
+@receiver(post_save, sender= User)
+def save_settings(sender, instance: User, **kwargs):
+    instance.settings.save()
