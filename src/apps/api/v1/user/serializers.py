@@ -7,7 +7,7 @@ from rest_framework.settings import api_settings
 from djoser.serializers import UidAndTokenSerializer, UserCreateMixin, UserCreatePasswordRetypeSerializer
 
 from apps.api.v1.book.serializers import BookSerializer
-from apps.user.models import User, UserBookRelation
+from apps.user.models import User, UserBookRelation, Settings
 from apps.word.models import UserWord
 
 
@@ -99,7 +99,13 @@ class BookmarkSerializer(serializers.ModelSerializer):
 
 
 class SettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Settings
+        fields = ['levels', 'dark_theme', 'count_word_in_round', 'number_of_false_set', 'time_to_view_result']
+        depth = 1
 
+class SettingsPageSerializer(serializers.ModelSerializer):
+    settings = SettingsSerializer()
     class Meta:
         model = User
         fields = ['username', 'email', 'activated_email', 'settings']

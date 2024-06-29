@@ -59,12 +59,12 @@ class TrainingListUpdate(Training, generics.ListAPIView, mixins.UpdateModelMixin
         type = self.get_type()
         user = self.request.user
         filter = self.create_filte(type=type)
-        count_word_in_round = user.settings["count_word_in_round"]
+        count_word_in_round = user.settings.count_word_in_round
         
         self.queryset = self.queryset.filter(**filter)[:count_word_in_round]
 
         if type == 'recognize':
-            number_of_false_set = user.settings["number_of_false_set"]
+            number_of_false_set = user.settings.number_of_false_set
             kwargs = {
                 "many": True,
                 "false_set": True,

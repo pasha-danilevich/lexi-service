@@ -43,7 +43,7 @@ class VocabularyStats(generics.ListAPIView, Vocabulary):
 
     def get_value(self, type):
         user = self.request.user
-        levels_length = user.settings.get('levels').__len__()
+        levels_length = len(user.settings.levels)
 
         user_words_queryset = self.get_queryset()
         value = get_words_count_on_levels(

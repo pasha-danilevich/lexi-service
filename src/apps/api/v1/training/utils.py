@@ -1,4 +1,4 @@
-from django.conf import settings
+from django.conf import settings as django_settings
 import os
 import json
 from random import randint, choice
@@ -6,7 +6,7 @@ from random import randint, choice
 
 def get_time_on_lvl(user, current_lvl: int) -> int:
     second_in_day = 86400
-    levels = user.settings['levels']
+    levels = user.settings.levels
 
     day_in_lvl = levels[current_lvl-1]
     time = second_in_day * day_in_lvl
@@ -14,7 +14,7 @@ def get_time_on_lvl(user, current_lvl: int) -> int:
 
 
 def is_last_level(user, current_lvl: int):
-    levels = user.settings['levels']
+    levels = user.settings.levels
     count_lvl = len(levels)
 
     if count_lvl == current_lvl:
@@ -31,7 +31,7 @@ def is_first_level(current_lvl: int):
 
 class StaticFileContextManager:
     def __init__(self, filename, mode='r'):
-        self.file_path = os.path.join(settings.STATIC_ROOT, filename)
+        self.file_path = os.path.join(django_settings.STATIC_ROOT, filename)
         self.mode = mode
 
     def __enter__(self):
