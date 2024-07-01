@@ -106,7 +106,7 @@ class SettingsSerializer(serializers.ModelSerializer):
     theme = serializers.ChoiceField(choices=Settings.THEME_CHOICES, default='light')
 
     count_word_in_round = serializers.IntegerField(min_value=5, max_value=50)
-    number_of_false_set = serializers.IntegerField(min_value=3, max_value=10)
+    number_of_false_set = serializers.IntegerField(min_value=2, max_value=5)
     time_to_view_result = serializers.IntegerField(min_value=0, max_value=5000)
 
     class Meta:
