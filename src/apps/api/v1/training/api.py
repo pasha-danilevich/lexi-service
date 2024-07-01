@@ -4,7 +4,7 @@ from rest_framework import generics, mixins, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
-from .utils import get_time_on_lvl, is_last_level, is_first_level
+from .utils import get_time_on_lvl, is_last_level_or_out, is_first_level
 from apps.word.utils import get_current_unix_time
 
 from apps.api.v1.vocabulary.serializers import UserWord
@@ -79,7 +79,7 @@ class TrainingListUpdate(Training, generics.ListAPIView, mixins.UpdateModelMixin
     def patch(self, request, *args, **kwargs):
         type = self.get_type()
         instance = self.get_object()
-        user = self.request.user
+        levels = self.request.user.settings.levels
 
         is_correct = self.request.data['is_correct']
 
@@ -87,17 +87,21 @@ class TrainingListUpdate(Training, generics.ListAPIView, mixins.UpdateModelMixin
         type_time = type + '_time'
 
         current_lvl = getattr(instance, type_lvl)
-        # instance_cuttent_time = getattr(instance, type_time)
-
-        if is_correct and not is_last_level(user, current_lvl):
-            new_lvl = current_lvl + 1
-        elif not is_first_level(current_lvl):
-            new_lvl = current_lvl - 1
+        
+        if is_correct:
+            if not is_last_level_or_out(levels, current_lvl):
+                new_lvl = current_lvl + 1
+            else:
+                # остается на прежднем уровне (1й или последний)
+                new_lvl = current_lvl
         else:
-            # остается на прежднем уровне (1й или последний)
-            new_lvl = current_lvl
+            if not is_first_level(current_lvl):
+                new_lvl = current_lvl - 1
+            else:
+                # остается на прежднем уровне (1й или последний)
+                new_lvl = current_lvl
 
-        new_time = get_current_unix_time() + get_time_on_lvl(user, new_lvl)
+        new_time = get_current_unix_time() + get_time_on_lvl(levels, new_lvl)
 
         setattr(instance, type_lvl, new_lvl)
         setattr(instance, type_time, new_time)

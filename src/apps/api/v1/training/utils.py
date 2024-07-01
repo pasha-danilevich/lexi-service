@@ -4,20 +4,21 @@ import json
 from random import randint, choice
 
 
-def get_time_on_lvl(user, current_lvl: int) -> int:
+def get_time_on_lvl(levels, current_lvl: int) -> int:
     second_in_day = 86400
-    levels = user.settings.levels
-
-    day_in_lvl = levels[current_lvl-1]
+    try: 
+        day_in_lvl = levels[current_lvl-1]
+    except IndexError: # если индекс больше или меньше существуещего, то ставим последнюю дату
+        day_in_lvl = levels[-1]
+        
     time = second_in_day * day_in_lvl
     return time
 
 
-def is_last_level(user, current_lvl: int):
-    levels = user.settings.levels
+def is_last_level_or_out(levels, current_lvl: int):
     count_lvl = len(levels)
 
-    if count_lvl == current_lvl:
+    if count_lvl <= current_lvl:
         return True
 
     return False
@@ -28,6 +29,18 @@ def is_first_level(current_lvl: int):
         return True
     return False
 
+
+def unique_dict_list(dict_list):
+    unique_dicts = []
+    unique_translations = set()
+    
+    for d in dict_list:
+        text = d['translation']
+        if text not in unique_translations:
+            unique_translations.add(text)
+            unique_dicts.append(d)
+    
+    return unique_dicts
 
 class StaticFileContextManager:
     def __init__(self, filename, mode='r'):
@@ -45,7 +58,7 @@ class StaticFileContextManager:
 def convert_part_of_speech(part_of_speech: str):
     part_set = {
         'глагол': 'vb',
-        'noun phrase': 'np',
+        'причастие': 'prt', # в разработке
         'существительное': 'nn',
         'наречие': 'adv',
         'прилагательное': 'adj',
@@ -61,32 +74,36 @@ def convert_part_of_speech(part_of_speech: str):
 
 def get_false_set(instance, part_of_speech: str, number_of_false_set: int):
 
-    file_names = ['FalseSet.json', 'FalseSet_2.json']
+    file_names = ['FalseSet_2.json', 'FalseSet_2.json']
     file_name = file_names[randint(0, 1)]
 
     with StaticFileContextManager(file_name) as file:
         data_dict = json.loads(file.read())
         part_of_speech = convert_part_of_speech(part_of_speech)
+        # если в data_dict нет ключа part_of_speech то пусть ищет по ключю "mix"
+        target_words_on_part = data_dict.get(part_of_speech, data_dict.get("mix", []))
 
-        target_words_on_part = data_dict.get(part_of_speech)
         
         return generate_false_set(instance, target_words_on_part, number_of_false_set)
 
 
-def generate_false_set(instance, word_list, number_of_false_set=4):
+def generate_false_set(instance, word_list, number_of_false_set=3):
     false_set = []
     for _ in range(number_of_false_set):
         
         word = choice(word_list)
         text = word['val']
         
-        if text == instance:
+        if text == instance.text:
             continue
         
-        word = {
+        translation = choice(word['tr'])
+                
+        
+        false_word = {
             "text": text,
-            "translation": choice(word['tr'])
+            "translation": translation
         }
-        false_set.append(word)
-
-    return false_set
+        false_set.append(false_word)
+    
+    return unique_dict_list(false_set)
