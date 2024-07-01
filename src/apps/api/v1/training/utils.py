@@ -74,7 +74,7 @@ def convert_part_of_speech(part_of_speech: str):
 
 def get_false_set(instance, part_of_speech: str, number_of_false_set: int):
 
-    file_names = ['FalseSet_2.json', 'FalseSet_2.json']
+    file_names = ['FalseSet.json', 'FalseSet_2.json']
     file_name = file_names[randint(0, 1)]
 
     with StaticFileContextManager(file_name) as file:
