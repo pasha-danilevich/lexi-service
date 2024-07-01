@@ -13,7 +13,7 @@ from apps.user.models import UserBookRelation, User
 from apps.book.models import Book
 
 from .pagination import BookmarkPageNumberPagination
-from .serializers import BookmarkSerializer, SettingsPageSerializer
+from .serializers import BookmarkSerializer, SettingsPageSerializer, SettingsSerializer
 
 
 class BookmarkListCreate(generics.ListCreateAPIView, mixins.DestroyModelMixin):
@@ -81,10 +81,15 @@ class UserActivate(UserViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class UserSettings(generics.GenericAPIView, mixins.UpdateModelMixin):
 
-    serializer_class = SettingsPageSerializer
+class SettingsPageView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.method == 'PUT':
+            return SettingsSerializer
+        else:
+            return SettingsPageSerializer
 
     def get(self, request, *args, **kwargs):
         user = self.request.user
@@ -92,8 +97,13 @@ class UserSettings(generics.GenericAPIView, mixins.UpdateModelMixin):
         return Response(serializer.data)
     
     def put(self, request, *args, **kwargs):
-        instance = self.request.user
+        instance = self.request.user.settings  # Получаем экземпляр настроек пользователя
         serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=False)
+        serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
+
+    def perform_update(self, serializer):
+        serializer.save()
+
+    

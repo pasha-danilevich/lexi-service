@@ -50,11 +50,9 @@ def _get_list_words(queryset):
             'text': word.text,
             'translation': translation.text
         }
-        
+
         word_list.append(obj)
     return word_list
-    
-
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -99,25 +97,43 @@ class BookmarkSerializer(serializers.ModelSerializer):
 
 
 class SettingsSerializer(serializers.ModelSerializer):
+    levels = serializers.ListField(
+        child=serializers.IntegerField(),
+        min_length=3,
+        max_length=30
+    )
+
+    theme = serializers.ChoiceField(choices=Settings.THEME_CHOICES, default='light')
+
+    count_word_in_round = serializers.IntegerField(min_value=5, max_value=50)
+    number_of_false_set = serializers.IntegerField(min_value=3, max_value=10)
+    time_to_view_result = serializers.IntegerField(min_value=0, max_value=5000)
+
     class Meta:
         model = Settings
-        fields = ['levels', 'dark_theme', 'count_word_in_round', 'number_of_false_set', 'time_to_view_result']
+        fields = ['levels', 'theme', 'count_word_in_round', 'number_of_false_set', 'time_to_view_result']
         depth = 1
 
+    def update(self, instance, validated_data):
+        # Обновляем поля настроек
+        instance.levels = validated_data.get('levels', instance.levels)
+        instance.theme = validated_data.get('theme', instance.theme)
+        instance.count_word_in_round = validated_data.get('count_word_in_round', instance.count_word_in_round)
+        instance.number_of_false_set = validated_data.get('number_of_false_set', instance.number_of_false_set)
+        instance.time_to_view_result = validated_data.get('time_to_view_result', instance.time_to_view_result)
+        
+        instance.save()
+        return instance
+
+
+
+
 class SettingsPageSerializer(serializers.ModelSerializer):
+        
     settings = SettingsSerializer()
     class Meta:
         model = User
         fields = ['username', 'email', 'activated_email', 'settings']
 
 
-    def update(self, instance, validated_data):
-        # Обновляем поля пользователя
-
-        instance.username = validated_data.get('username', instance.username)
-        instance.email = validated_data.get('email', instance.email)
-        instance.activated_email = validated_data.get('activated_email', instance.activated_email)
-        instance.settings = validated_data.get('settings', instance.settings)
-
-        instance.save()
-        return instance
+    

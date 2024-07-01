@@ -32,9 +32,16 @@ class User(AbstractUser):
 
 
 class Settings(models.Model):
+    THEME_CHOICES = [
+        ('light', 'Светлая'),
+        ('dark', 'Темная'),
+        ('red', 'Красная'),
+        ('green', 'Зеленая'),
+    ]
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='settings')
     levels = models.JSONField(default=levels_default, null=False)
-    dark_theme = models.BooleanField(default=False, null=False)
+    theme = models.CharField(max_length=20, choices=THEME_CHOICES, default='light')
     count_word_in_round = models.IntegerField(default=10, null=False)
     number_of_false_set = models.IntegerField(default=3, null=False)
     time_to_view_result = models.IntegerField(default=1000, null=False)
