@@ -27,11 +27,24 @@ def word_bulk_create(cls, word_set: dict, word: Word):
 
 
 
-def get_or_create_word(request_word):
+def get_or_create_word(request_word: str = None, id: int = None):
+    lookup_field = None
+    lookup_value = None
+    
+    if id:
+        lookup_field = 'id'
+        lookup_value = id
+    else:
+        lookup_field = 'text'
+        lookup_value = request_word
+    
     try:
-        word = Word.objects.get(text=request_word)
+        word = Word.objects.get(**{lookup_field: lookup_value})
         return word
     except Word.DoesNotExist:
+        if not request_word:
+            return None
+        
         word_set = fetch_word_data(request_word)
 
         if not word_set:
