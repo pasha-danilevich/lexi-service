@@ -30,13 +30,15 @@ class BookmarkListCreate(generics.ListCreateAPIView, mixins.DestroyModelMixin):
         book = Book.objects.get(id=request.data['book_id'])
         target_page = request.data['target_page']
 
-        UserBookRelation.objects.update_or_create(
+        obj, is_created = UserBookRelation.objects.update_or_create(
             user=user,
             book=book,
             defaults={
                 'target_page': target_page
             }
         )
+        if is_created:
+            return Response(status=status.HTTP_201_CREATED)
 
         return Response(status=status.HTTP_200_OK)
 
