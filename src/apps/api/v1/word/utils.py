@@ -1,7 +1,8 @@
 import re
 
 from apps.api.v1.word.yandex_dictionary import fetch_word_data
-from apps.word.models import Meaning, Synonym, Translation, Word
+from apps.user.models import User
+from apps.word.models import Meaning, Synonym, Translation, UserWord, Word
 
 
 def clean_string(text):
@@ -59,14 +60,17 @@ def get_or_create_word(request_word: str = None, id: int = None):
         return word
 
 
-def check_related_user(word, user):
-
+def get_related_pk(word: Word, user: User):
+    # Проверяем, есть ли у слова связанные пользователи
     if word.users.exists():
+        
+        # Получаем все слова, связанные с данным пользователем
+        words_releted_user = user.words.all()
 
-        user_related_word = user.words.all()
+        # Пробуем получить среди связанных слов пользователя это самое слово
+        try:
+            word = words_releted_user.filter(word_id=word.id).first()
+            return word.pk
+        except UserWord.DoesNotExist:
+            return None
 
-        if user_related_word.filter(word_id=word.id).exists():
-
-            return True
-
-    return False

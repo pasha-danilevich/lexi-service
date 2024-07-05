@@ -7,7 +7,7 @@ from apps.api.v1.word.serializers import Word, WordSerializer
 
 from config.settings import print_local_var
 from .yandex_dictionary import fetch_word_data
-from .utils import check_related_user, clean_string, get_or_create_word
+from .utils import get_related_pk, clean_string, get_or_create_word
 
 
 class WordCreate(generics.GenericAPIView, mixins.CreateModelMixin):
@@ -32,7 +32,7 @@ class WordCreate(generics.GenericAPIView, mixins.CreateModelMixin):
 
         response = {
             "word": serializer.data,
-            'this_word_related_with_user': check_related_user(word=word, user=user)
+            'related_pk': get_related_pk(word=word, user=user)
         }
 
         return Response(response, status=status.HTTP_200_OK)
