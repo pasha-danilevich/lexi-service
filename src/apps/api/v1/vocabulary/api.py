@@ -37,6 +37,11 @@ class VocabularyListCreate(generics.ListCreateAPIView, Vocabulary):
     
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+    
+class VocabularyDelete(generics.DestroyAPIView, Vocabulary):
+    lookup_field = 'pk'
+    
+    
 
 
 class VocabularyStats(generics.ListAPIView, Vocabulary):
