@@ -74,7 +74,11 @@ class TrainingListUpdate(Training, generics.ListAPIView, mixins.UpdateModelMixin
             kwargs = {"many": True}
 
         serializer = self.get_serializer(self.queryset, **kwargs)
-        return Response(serializer.data)
+        
+        if serializer.data:
+            return Response(serializer.data)
+        else:
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
     def patch(self, request, *args, **kwargs):
         type = self.get_type()
