@@ -1,4 +1,6 @@
-from rest_framework.pagination import PageNumberPagination
+from apps.api.v1.pagination import CustomPageNumberPagination
 
-class BookPageNumberPagination(PageNumberPagination):
-    page_size = 10
+
+class BookPageNumberPagination(CustomPageNumberPagination):
+    page_size = 1
+    

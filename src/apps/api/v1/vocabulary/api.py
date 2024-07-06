@@ -6,13 +6,13 @@ from rest_framework.permissions import IsAuthenticated
 from config.settings import print_local_var
 from .utils import get_words_count_on_levels
 from .serializers import UserWord, UserWordSerializer, UserWordListSerializer
-
+from .pagination import VocabularyPageNumberPagination
 
 class Vocabulary(generics.GenericAPIView):
     queryset = UserWord.objects.all().order_by('-id')
     serializer_class = UserWordSerializer
     permission_classes = (IsAuthenticated, )
-    pagination_class = None
+    pagination_class = VocabularyPageNumberPagination
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
