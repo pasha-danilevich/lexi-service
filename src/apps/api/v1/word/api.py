@@ -17,7 +17,7 @@ class WordCreate(generics.GenericAPIView, mixins.CreateModelMixin):
     
 
     def post(self, request, *args, **kwargs):
-        request_word = clean_string(self.request.data.get('word', None))
+        request_word = clean_string(self.request.data.get('word', None)).lower()
         user = self.request.user
 
         if not request_word:
@@ -37,8 +37,11 @@ class WordCreate(generics.GenericAPIView, mixins.CreateModelMixin):
 
         return Response(response, status=status.HTTP_200_OK)
     
-    def get(self, request, pk, *args, **kwargs):
-        word = get_or_create_word(id=pk)
+    def get(self, pk):
+        try:
+            word = Word.objects.get(id=pk)
+        except Word.DoesNotExist:
+            return Response(data='Объект не найден и нет данных о слове', status=status.HTTP_404_NOT_FOUND)
         
         serializer = WordSerializer(word)
         data = serializer.data

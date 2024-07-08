@@ -3,7 +3,7 @@ from .utils import get_current_unix_time
 
 
 class Word(models.Model):
-    text = models.CharField(max_length=100)
+    text = models.CharField(max_length=100, unique=True)
     part_of_speech = models.CharField(
         max_length=100, null=True, blank=True)  # Часть речи
     transcription = models.CharField(
