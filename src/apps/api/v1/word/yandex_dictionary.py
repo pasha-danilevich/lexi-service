@@ -1,25 +1,60 @@
 import requests
 from rest_framework.response import Response
 from rest_framework import status
+from config.local_settings import Y_KEY
 
 
-def fetch_word_data(text):
+from datetime import datetime
+
+def record_execution_time(func):
+    def wrapper(*args, **kwargs):
+        time_start = datetime.now()
+        result = func(*args, **kwargs)
+        time_end = datetime.now()
+        execution_time = time_end - time_start
+        sec_milisec_execution_time = str(execution_time).split(':')[-1]
+        return result, sec_milisec_execution_time
+    return wrapper
+
+@record_execution_time        
+def get_response(url, params):
+    return requests.get(url, params=params)
+
+def fetch_word_data(word: str):
     url = "https://dictionary.yandex.net/api/v1/dicservice.json/lookup"
+    
+    if not word:
+        return None
+    
     params = {
-        'key': 'dict.1.1.20240401T142057Z.dca24aa264de304c.6a1ba247e07408be736f729f72b1fe4d3d7e51cc',
+        'key': Y_KEY,
         'lang': 'en-ru',
-        'text': text,
+        'text': word,
         'ui': 'ru',
-        # 'flag': 2
+        'flags': 2
     }
 
-    response = requests.get(url, params=params)
+    response, execution_time = get_response(url, params=params)
+    
+    
+    
     if not response.status_code == 200:
         return None
 
     json_data = response.json()
-
-    if not json_data['def']:
+    is_empty_response = False if json_data['def'] else True
+    
+    
+    
+    # Логирование
+    time = datetime.now().strftime('%m-%d-%H-%M-%S')
+    status_code = '404' if is_empty_response else '200'
+    
+    log_data = f"{time} {status_code} {execution_time} {word.lower()}"
+    with open("yandex_dictionary_log.txt", "a") as log_file:
+        log_file.write(log_data + "\n")
+        
+    if is_empty_response:
         return None
 
     word_set = {
