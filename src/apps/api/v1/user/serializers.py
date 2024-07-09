@@ -37,9 +37,6 @@ class CustomUserCreatePasswordRetypeSerializer(CustomUserCreateMixin, UserCreate
     pass
 
 
-def _get_quantity(cls, field, value):
-    return cls.objects.filter(**{field: value}).count()
-
 
 def _get_list_words(queryset):
     word_list = []
@@ -65,14 +62,17 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ['username', 'upload_book', 'studied_word', 'new_word']
 
     def get_upload_book(self, obj):
-        return _get_quantity(UserBookRelation, 'user_id', obj.id)
+        return self._get_quantity(UserBookRelation, 'user_id', obj.id)
 
     def get_studied_word(self, obj):
-        return _get_quantity(UserWord, 'user_id', obj.id)
+        return self._get_quantity(UserWord, 'user_id', obj.id)
 
     def get_new_word(self, obj):
         user_words_queryset = obj.words.all()
         return _get_list_words(user_words_queryset)
+    
+    def _get_quantity(self, cls, field, value):
+        return cls.objects.filter(**{field: value}).count()
 
 
 class BookmarkSerializer(serializers.ModelSerializer):

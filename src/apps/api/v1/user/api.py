@@ -15,6 +15,8 @@ from apps.book.models import Book
 from .pagination import BookmarkPageNumberPagination
 from .serializers import BookmarkSerializer, SettingsPageSerializer, SettingsSerializer
 
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 
 class BookmarkListCreate(generics.ListCreateAPIView, mixins.DestroyModelMixin):
 
@@ -51,6 +53,13 @@ class BookmarkDestroy(generics.DestroyAPIView):
 
 class UserActivate(UserViewSet):
 
+    def validate_email(self, email):
+        try:
+            validate_email(email)
+        except ValidationError:
+            return False
+        return True
+    
     @action(["post"], detail=False)
     def activation(self, request, uid, token, *args, **kwargs):
 
@@ -81,7 +90,24 @@ class UserActivate(UserViewSet):
             settings.EMAIL.activation(self.request, context).send(to)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
-
+    
+    @action(["post"], detail=False)
+    def set_email(self, request, *args, **kwargs):
+        
+        user: User = self.request.user
+        email: str = self.request.data.get('email', None)
+        
+        if not email:
+            return Response(data="Email не был передан", status=status.HTTP_400_BAD_REQUEST)
+        
+        if not self.validate_email(email):
+            return Response(data="Некорректный email-адрес", status=status.HTTP_400_BAD_REQUEST)
+    
+        
+        user.email = email
+        user.save()
+        
+        return Response(data=email, status=status.HTTP_200_OK)
 
 
 class SettingsPageView(generics.GenericAPIView):
