@@ -20,6 +20,8 @@ API_VERSION = 'v1'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+SITE_URL = "http://127.0.0.1:8000"
+
 ALLOWED_HOSTS = []
 
 
