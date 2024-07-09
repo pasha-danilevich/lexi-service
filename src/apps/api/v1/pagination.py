@@ -1,3 +1,5 @@
+from math import ceil
+from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 
 class CustomPageNumberPagination(PageNumberPagination):
@@ -15,4 +17,12 @@ class CustomPageNumberPagination(PageNumberPagination):
         if page_number == 1:
             return 1
         return page_number
+    
+    def get_paginated_response(self, data):
+        return Response({
+            'page_count': ceil(self.page.paginator.count / self.get_page_size(self.request)),
+            'next': self.get_next_link(),
+            'previous': self.get_previous_link(),
+            'results': data,
+        })
 
