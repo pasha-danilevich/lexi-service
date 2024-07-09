@@ -1,7 +1,6 @@
 import inspect
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 
 from apps.api.v1.word.serializers import Word, WordSerializer
 
@@ -13,7 +12,6 @@ from .utils import get_related_pk, clean_string, get_or_create_word
 class WordCreate(generics.GenericAPIView, mixins.CreateModelMixin):
     queryset = Word.objects.all()
     serializer_class = WordSerializer
-    permission_classes = [IsAuthenticated]
     
 
     def post(self, request, *args, **kwargs):
@@ -23,17 +21,24 @@ class WordCreate(generics.GenericAPIView, mixins.CreateModelMixin):
         if not request_word:
             return Response(data='Слово не передано', status=status.HTTP_400_BAD_REQUEST)
 
-        word = get_or_create_word(request_word)
+        word, created = get_or_create_word(request_word)
 
         if not word:
             return Response(data='Объект не найден и нет данных о слове', status=status.HTTP_404_NOT_FOUND)
-
+        
         serializer = WordSerializer(word)
-
         response = {
-            "word": serializer.data,
-            'related_pk': get_related_pk(word=word, user=user)
-        }
+                "word": serializer.data
+            }
+        if created:
+            response.update({
+                'related_pk': None
+            }) 
+            return Response(response, status=status.HTTP_201_CREATED)
+        if user.is_authenticated:
+            response.update({
+                'related_pk': get_related_pk(word=word, user=user)
+            })
 
         return Response(response, status=status.HTTP_200_OK)
     
