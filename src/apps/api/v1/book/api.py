@@ -2,8 +2,7 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-from .pagination import BookPageNumberPagination
-
+from apps.api.v1.book.pagination import BookListPageNumberPagination
 from apps.book.models import Book
 from apps.book.utils import json_to_book
 
@@ -12,7 +11,7 @@ from apps.api.v1.book.serializers import BookSerializer, BookRetrieveSerializer
 class BookListCreate(generics.ListCreateAPIView):
     queryset = Book.objects.all().order_by('-id')
     serializer_class = BookSerializer
-    pagination_class = BookPageNumberPagination
+    pagination_class = BookListPageNumberPagination
     permission_classes = [IsAuthenticatedOrReadOnly]
     
     def get_serializer(self, *args, **kwargs):

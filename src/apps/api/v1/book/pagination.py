@@ -1,6 +1,6 @@
 from apps.api.v1.pagination import CustomPageNumberPagination
 
 
-class BookPageNumberPagination(CustomPageNumberPagination):
+class BookListPageNumberPagination(CustomPageNumberPagination):
     page_size = 10
     

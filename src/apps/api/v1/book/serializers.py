@@ -52,6 +52,7 @@ class BookRetrieveSerializer(serializers.ModelSerializer):
         super().__init__(*args, **kwargs)
 
     pages = serializers.SerializerMethodField()
+    pages_slice = serializers.SerializerMethodField()
     bookmark = serializers.SerializerMethodField()
 
     class Meta:
@@ -62,18 +63,29 @@ class BookRetrieveSerializer(serializers.ModelSerializer):
             'author',
             'author_upload',
             'page_count',
+            'pages_slice',
             'slug',
             'pages',
             'bookmark'
         ]
-
-    def get_pages(self, obj):
+    def get_start_end(self, obj: Book):
         page = self.page - 1
         size_page_slice = 50
 
         start = (page // size_page_slice) * size_page_slice
         end = (page // size_page_slice) * size_page_slice + size_page_slice
+        
+        if end > obj.page_count:
+            end = obj.page_count
+        
+        return (start, end)
+    
+    def get_pages_slice(self, obj: Book):
+        start, end = self.get_start_end(obj)
+        return [start + 1, end]
 
+    def get_pages(self, obj: Book):
+        start, end = self.get_start_end(obj)
         pages_set = obj.book[start:end]
         return pages_set
     
