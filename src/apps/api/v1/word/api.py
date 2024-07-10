@@ -5,14 +5,13 @@ from rest_framework.response import Response
 from apps.api.v1.word.serializers import Word, WordSerializer
 
 from config.settings import print_local_var
-from .yandex_dictionary import fetch_word_data
 from .utils import get_related_pk, clean_string, get_or_create_word
 
-
-class WordCreate(generics.GenericAPIView, mixins.CreateModelMixin):
+class WordGeneric(generics.GenericAPIView):
     queryset = Word.objects.all()
     serializer_class = WordSerializer
     
+class WordCreate(WordGeneric, mixins.CreateModelMixin):
 
     def post(self, request, *args, **kwargs):
         request_word = clean_string(self.request.data.get('word', None)).lower()
@@ -42,11 +41,14 @@ class WordCreate(generics.GenericAPIView, mixins.CreateModelMixin):
 
         return Response(response, status=status.HTTP_200_OK)
     
-    def get(self, pk):
+    
+class WordGet(WordGeneric):
+
+    def get(self, request, pk):
         try:
             word = Word.objects.get(id=pk)
         except Word.DoesNotExist:
-            return Response(data='Объект не найден и нет данных о слове', status=status.HTTP_404_NOT_FOUND)
+            return Response(data='Объект не найден и нет данных о слове либо был удален.', status=status.HTTP_404_NOT_FOUND)
         
         serializer = WordSerializer(word)
         data = serializer.data
