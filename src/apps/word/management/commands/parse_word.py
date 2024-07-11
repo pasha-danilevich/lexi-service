@@ -18,7 +18,7 @@ class Command(BaseCommand):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.duration = 0
+        self.duration = 10
         self.limit = 5000
         self.file_path = None
         self.count_fetch = 0

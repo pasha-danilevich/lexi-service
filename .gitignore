@@ -19,3 +19,4 @@ text_to_book.py
 src/config/local_settings.py
 src/config/__pycache__/settings.cpython-311.pyc
 src/yandex_dictionary_log.txt
+404_words.txt
