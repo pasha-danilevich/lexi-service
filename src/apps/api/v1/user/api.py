@@ -1,4 +1,3 @@
-from djoser.serializers import UserFunctionsMixin
 from rest_framework import generics, status, mixins
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
