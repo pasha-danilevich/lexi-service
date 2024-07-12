@@ -6,8 +6,8 @@ from rest_framework.settings import api_settings
 
 from djoser.serializers import UidAndTokenSerializer, UserCreateMixin, UserCreatePasswordRetypeSerializer
 
-from apps.api.v1.book.serializers import BookSerializer
-from apps.user.models import User, UserBookRelation, Settings
+from apps.book.models import UserBook
+from apps.user.models import User, Settings
 from apps.word.models import UserWord
 
 
@@ -62,7 +62,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ['username', 'upload_book', 'studied_word', 'new_word']
 
     def get_upload_book(self, obj):
-        return self._get_quantity(UserBookRelation, 'user_id', obj.id)
+        return self._get_quantity(UserBook, 'user_id', obj.id)
 
     def get_studied_word(self, obj):
         return self._get_quantity(UserWord, 'user_id', obj.id)
@@ -75,25 +75,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         return cls.objects.filter(**{field: value}).count()
 
 
-class BookmarkSerializer(serializers.ModelSerializer):
 
-    book_cover = serializers.SerializerMethodField()
-
-    class Meta:
-        model = UserBookRelation
-        fields = ['pk', 'book_cover', 'target_page']
-        extra_kwargs = {'book_cover': {'read_only': True}}
-
-    def get_book_cover(self, obj):
-        book_serializer = BookSerializer(obj.book)
-        book_data = book_serializer.data
-        data = {
-            "title": book_data['title'],
-            "author": book_data['author'],
-            "slug": book_data['slug'],
-            "book_id": book_data['pk']
-        }
-        return data
 
 
 class SettingsSerializer(serializers.ModelSerializer):

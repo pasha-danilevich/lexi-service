@@ -2,7 +2,6 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
-from apps.user.models import UserBookRelation
 from apps.word.models import UserWord
 
 from .serializers import HomeSerializer

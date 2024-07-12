@@ -1,54 +1,68 @@
 from rest_framework import serializers
-from apps.book.models import Book
-from apps.user.models import UserBookRelation
+from apps.api.v1.book.utils import get_page_from_context
+from apps.book.models import Book, UserBook
+from apps.user.models import User
+from config.settings import PAGE_SLICE_SIZE
 
 
-def bookmark(self, obj):
-    if self.user:  
-        bookmark = UserBookRelation.objects.filter(user_id=self.user.id, book=obj.pk).first()
-        if bookmark:
-            data = {
-                'pk': bookmark.pk,
-                'target_page': bookmark.target_page
-            }
-            return data
-    else:
-        return None
+common_book_fields = [
+    'pk',
+    'title',
+    'author',
+    'author_upload',
+    'page_count',
+    'slug',
+]
 
-class BookSerializer(serializers.ModelSerializer):
-    def __init__(self, *args, **kwargs):
-        self.user = kwargs.pop('user', None)
-        super().__init__(*args, **kwargs)
-    
-    bookmark = serializers.SerializerMethodField()
-    
+class BookmarkRetrieveCreateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Book
+        model = UserBook
         fields = [
             'pk',
-            'title',
-            'author',
-            'author_upload',
-            'page_count',
-            'slug',
-            'book',
-            'bookmark'
+            'book'
+            'target_page'
         ]
+        extra_kwargs = {
+            'book': {'write_only': True}
+        }
+
+
+class BookmarkListSerializer(serializers.ModelSerializer):
+
+    book_cover = serializers.SerializerMethodField()
+
+    class Meta:
+        model = UserBook
+        fields = ['pk', 'book_cover', 'target_page']
+        extra_kwargs = {'book_cover': {'read_only': True}}
+
+    def get_book_cover(self, obj):
+        book_serializer = BookListCreateSerializer(obj.book)
+        book_data = book_serializer.data
+        data = {
+            "title": book_data['title'],
+            "author": book_data['author'],
+            "slug": book_data['slug'],
+            "book_id": book_data['pk']
+        }
+        return data
+
+
+class BookListCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Book
+        fields = common_book_fields + ['book']
         extra_kwargs = {
             'slug': {'read_only': True},
             'author_upload': {'write_only': True},
             'book': {'write_only': True}
         }
-        
-    def get_bookmark(self, obj):
-        return bookmark(self=self, obj=obj)
+
 
 
 class BookRetrieveSerializer(serializers.ModelSerializer):
-    def __init__(self, *args, **kwargs):
-        self.page = kwargs.pop('page')
-        self.user = kwargs.pop('user', None)
-        super().__init__(*args, **kwargs)
+
 
     pages = serializers.SerializerMethodField()
     pages_slice = serializers.SerializerMethodField()
@@ -57,29 +71,40 @@ class BookRetrieveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Book
-        fields = [
-            'pk',
-            'title',
-            'author',
-            'author_upload',
-            'page_count',
+        fields = common_book_fields + [
             'pages_slice',
             'slice_length',
-            'slug',
             'pages',
             'bookmark'
         ]
+    
+    def get_bookmark(self, obj):
+        user: User = self.context['request'].user
+        
+        if user.is_anonymous:
+            return None
+        
+        try:
+            user_book = UserBook.objects.get(book=obj, user=user)
+            return {
+                'pk': user_book.pk,
+                'target_page': user_book.target_page
+            }
+        except UserBook.DoesNotExist:
+            return None
 
+    
     def get_slice_length(self, obj):
-        size_page_slice = 50
-        return size_page_slice
+        return PAGE_SLICE_SIZE
 
     def get_start_end(self, obj: Book):
-        page = self.page - 1
-        size_page_slice = self.get_slice_length(obj)
+        
+        page = get_page_from_context(context=self.context)
+        
+        page_slice_size = PAGE_SLICE_SIZE
 
-        start = (page // size_page_slice) * size_page_slice
-        end = (page // size_page_slice) * size_page_slice + size_page_slice
+        start = (page // page_slice_size) * page_slice_size
+        end = (page // page_slice_size) * page_slice_size + page_slice_size
 
         if end > obj.page_count:
             end = obj.page_count
@@ -94,7 +119,3 @@ class BookRetrieveSerializer(serializers.ModelSerializer):
         start, end = self.get_start_end(obj)
         pages_set = obj.book[start:end]
         return pages_set
-
-    def get_bookmark(self, obj):
-        return bookmark(self=self, obj=obj)
-        

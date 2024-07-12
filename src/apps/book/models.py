@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.text import slugify
+
 from .utils import transliterate
 
 def book_default():
@@ -30,4 +31,13 @@ class Book(models.Model):
         from django.urls import reverse
         
         return reverse("books-retrieve", kwargs={"pk": self.pk})
-    
+
+class UserBook(models.Model):
+    user = models.ForeignKey(
+        "user.User", related_name='related_books', on_delete=models.CASCADE)
+    book = models.ForeignKey(
+        Book, related_name='related_users', on_delete=models.CASCADE)
+    target_page = models.IntegerField('target page', blank=False)
+
+    def __str__(self) -> str:
+        return f"User: {self.user} left a bookmark {self.target_page}. Book: {self.book} "

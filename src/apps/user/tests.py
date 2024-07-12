@@ -1,5 +1,5 @@
-from apps.user.models import UserBookRelation, User
-from apps.book.models import Book
+from apps.user.models import User
+from apps.book.models import Book, UserBook
 from apps.word.models import UserWord, Word
 
 from config.settings import p, print_local_var
@@ -48,35 +48,35 @@ class TestStringMethods(TestCase):
         b = Book.objects.get(id=1)
         b2 = Book.objects.get(id=2)
         
-        obj, created = UserBookRelation.objects.update_or_create(
+        obj, created = UserBook.objects.update_or_create(
             user=u, 
             book=b, 
             defaults={
                 "target_page": 10
                 }
         )
-        obj, created = UserBookRelation.objects.update_or_create(
+        obj, created = UserBook.objects.update_or_create(
             user=u, 
             book=b, 
             defaults={
                 "target_page": 30
                 }
         )
-        obj, created = UserBookRelation.objects.update_or_create(
+        obj, created = UserBook.objects.update_or_create(
             user=u, 
             book=b2, 
             defaults={
                 "target_page": 30
                 }
         )
-        obj, created = UserBookRelation.objects.update_or_create(
+        obj, created = UserBook.objects.update_or_create(
             user=u, 
             book=b2, 
             defaults={
                 "target_page": 102
                 }
         )
-        obj, created = UserBookRelation.objects.update_or_create(
+        obj, created = UserBook.objects.update_or_create(
             user=u, 
             book=b2, 
             defaults={
@@ -90,10 +90,7 @@ class TestStringMethods(TestCase):
         wu = word.user_related_with_word.all()
         
         print_local_var(locals=locals())
-        # word = 
 
-        
-        # p(UserBookRelation.objects.all())
 
         
 

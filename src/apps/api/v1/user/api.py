@@ -1,53 +1,21 @@
-from rest_framework import generics, status, mixins
+from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 
 from djoser.views import UserViewSet
-from djoser import signals
+
 from djoser.conf import settings
 from djoser.compat import get_user_email
 
-from apps.user.models import UserBookRelation, User
-from apps.book.models import Book
+from apps.user.models import User
 
-from .pagination import BookmarkPageNumberPagination
-from .serializers import BookmarkSerializer, SettingsPageSerializer, SettingsSerializer
+from .serializers import SettingsPageSerializer, SettingsSerializer
 
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 
-class BookmarkListCreate(generics.ListCreateAPIView, mixins.DestroyModelMixin):
 
-    serializer_class = BookmarkSerializer
-    permission_classes = [IsAuthenticated]
-    pagination_class = BookmarkPageNumberPagination
-
-    def get_queryset(self):
-        return UserBookRelation.objects.filter(user_id=self.request.user.id).order_by('-id')
-
-    def post(self, request, *args, **kwargs):
-        user = request.user
-        book = Book.objects.get(id=request.data['book_id'])
-        target_page = request.data['target_page']
-
-        obj, is_created = UserBookRelation.objects.update_or_create(
-            user=user,
-            book=book,
-            defaults={
-                'target_page': target_page
-            }
-        )
-        if is_created:
-            return Response(status=status.HTTP_201_CREATED)
-
-        return Response(status=status.HTTP_200_OK)
-
-
-class BookmarkDestroy(generics.DestroyAPIView):
-    queryset = UserBookRelation.objects.all()
-    serializer_class = BookmarkSerializer
-    permission_classes = [IsAuthenticated]
 
 
 class UserActivate(UserViewSet):

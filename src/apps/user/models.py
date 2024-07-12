@@ -46,15 +46,6 @@ class Settings(models.Model):
     number_of_false_set = models.IntegerField(default=3, null=False)
     time_to_view_result = models.IntegerField(default=1000, null=False)
 
-class UserBookRelation(models.Model):
-    user = models.ForeignKey(
-        User, related_name='related_books', on_delete=models.CASCADE)
-    book = models.ForeignKey(
-        Book, related_name='related_users', on_delete=models.CASCADE)
-    target_page = models.IntegerField('target page', blank=False)
-
-    def __str__(self) -> str:
-        return f"User: {self.user} left a bookmark {self.target_page}. Book: {self.book} "
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
