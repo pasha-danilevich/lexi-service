@@ -10,18 +10,13 @@ from .serializers import HomeSerializer
 
 class HomeView(generics.GenericAPIView):
     queryset = UserWord.objects.all().order_by('-id')
-    permission_classes = (IsAuthenticated, )
-    
-    def get_queryset(self):
-        queryset = self.queryset.filter(user_id = self.request.user.id)
-        return queryset
+    permission_classes = [IsAuthenticated] 
+    serializer_class = HomeSerializer
     
     
     def get(self, request):
-        queryset = self.get_queryset()
-        user = self.request.user
         
-        serializer = HomeSerializer(queryset=queryset, user = user)
+        serializer = self.get_serializer()
         serializer.is_valid()
         
         return Response(serializer.data)
