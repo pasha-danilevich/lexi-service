@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.api.v1.book.utils import get_page_from_context
+from apps.api.v1.book.utils import get_start_end, get_user_bookmark
 from apps.book.models import Book, UserBook
 from apps.user.models import User
 from config.settings import PAGE_SLICE_SIZE
@@ -78,44 +78,20 @@ class BookRetrieveSerializer(serializers.ModelSerializer):
             'bookmark'
         ]
     
+        
     def get_bookmark(self, obj):
         user: User = self.context['request'].user
-        
-        if user.is_anonymous:
-            return None
-        
-        try:
-            user_book = UserBook.objects.get(book=obj, user=user)
-            return {
-                'pk': user_book.pk,
-                'target_page': user_book.target_page
-            }
-        except UserBook.DoesNotExist:
-            return None
+        return get_user_bookmark(obj, user)
 
     
     def get_slice_length(self, obj):
         return PAGE_SLICE_SIZE
 
-    def get_start_end(self, obj: Book):
-        
-        page = get_page_from_context(context=self.context)
-        
-        page_slice_size = PAGE_SLICE_SIZE
-
-        start = (page // page_slice_size) * page_slice_size
-        end = (page // page_slice_size) * page_slice_size + page_slice_size
-
-        if end > obj.page_count:
-            end = obj.page_count
-
-        return (start, end)
-
     def get_pages_slice(self, obj: Book):
-        start, end = self.get_start_end(obj)
+        start, end = get_start_end(self.context, obj)
         return [start + 1, end]
 
     def get_pages(self, obj: Book):
-        start, end = self.get_start_end(obj)
+        start, end = get_start_end(self.context, obj)
         pages_set = obj.book[start:end]
         return pages_set

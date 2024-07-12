@@ -1,19 +1,21 @@
+from django.shortcuts import redirect
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import generics, mixins, status
 from rest_framework.permissions import IsAuthenticated
 
+from apps.api.v1.book.utils import get_user_bookmark
 from apps.book.models import Book, UserBook
 from apps.book.utils import json_to_book
 
 from .pagination import BookListPageNumberPagination, BookmarkPageNumberPagination
 from .serializers import BookListCreateSerializer, BookRetrieveSerializer, BookmarkListSerializer, BookmarkRetrieveCreateSerializer
 
-class GenaricBook(generics.GenericAPIView):
+class GenericBook(generics.GenericAPIView):
     queryset = Book.objects.all().order_by('-id')
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-class BookListCreate(generics.ListCreateAPIView, GenaricBook):
+class BookListCreate(generics.ListCreateAPIView, GenericBook):
     serializer_class = BookListCreateSerializer
     pagination_class = BookListPageNumberPagination
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -25,12 +27,27 @@ class BookListCreate(generics.ListCreateAPIView, GenaricBook):
         request.data['author_upload'] = request.user.id
         return super().post(request, *args, **kwargs)
     
-class BookRetrieve(generics.RetrieveAPIView, GenaricBook):
+class BookRetrieve(generics.RetrieveAPIView, GenericBook):
     serializer_class = BookRetrieveSerializer
     pagination_class = None
-    lookup_field = 'slug'
+    lookup_field = 'slug'   
     
-
+    def get(self, request, page, *args, **kwargs):
+        obj: Book = super().get_object()
+        user = self.request.user
+        url_page = page
+        bookmark = get_user_bookmark(obj, user = user)
+        serializer = self.get_serializer(obj)
+        
+        if bookmark:
+            page = bookmark.get('target_page')
+            
+            if url_page == page:
+                return Response(serializer.data)
+            
+            return redirect('books-retrieve', slug=obj.slug, page=page)
+        
+        return Response(serializer.data)
 
 class BookmarkListCreate(generics.ListCreateAPIView, mixins.DestroyModelMixin):
 
