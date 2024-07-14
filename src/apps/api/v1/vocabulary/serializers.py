@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from apps.api.v1.training.utils import get_false_set
-from apps.word.models import Dictionary
+from apps.word.models import Dictionary, Training
 from apps.api.v1.word.serializers import WordSerializer
 
 
@@ -20,19 +20,18 @@ class DictionarySerializer(serializers.ModelSerializer):
         }
 
 
+class TrainingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Training
+        fields = ['type', 'lvl', 'time']
+
 class DictionaryListSerializer(serializers.ModelSerializer):
-    
-    word = serializers.SerializerMethodField()
-    
+    training = TrainingSerializer(many=True, read_only=True)
+
     class Meta:
         model = Dictionary
-        fields = ["pk", "word"]
-        
+        fields = ["pk", "word", "translation", "training"]
+        depth = 1
     
-    def get_word(self, obj):
-        word = obj.word
-        fields = ('pk', 'text', 'part_of_speech', 'transcription')
-        serializers = WordSerializer(word, fields=fields)
-        data = serializers.data
-        return data
+
     
