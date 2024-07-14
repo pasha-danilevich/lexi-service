@@ -83,13 +83,6 @@ class Training(models.Model):
     lvl = models.IntegerField("lvl", default=1, null=False)
     time = models.IntegerField("time", null=False)
 
-    def save(self, is_instance=False, *args, **kwargs) -> None:
-        if is_instance:
-            return super().save(*args, **kwargs)
-
-        self.time = get_current_unix_time()
-
-        return super().save(*args, **kwargs)
 
     def __str__(self) -> str:
         return f"To {self.dictionary} add training {self.type}"
