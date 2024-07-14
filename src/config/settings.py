@@ -218,6 +218,10 @@ PENALTY_SIZE = 100
 
 PAGE_SLICE_SIZE = 50
 
+# TRAINING
+
+TRAINING_TYPES = ['recognize', 'reproduce']
+
 # CORS
 
 CORS_ALLOWED_ORIGINS = [

@@ -1,24 +1,24 @@
 import inspect
-from rest_framework import generics, mixins, status
+from rest_framework import generics,  status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
-from config.settings import print_local_var
 from .utils import get_words_count_on_levels
-from .serializers import UserWord, UserWordSerializer, UserWordListSerializer
+from .serializers import DictionarySerializer, DictionaryListSerializer
 from .pagination import VocabularyPageNumberPagination
+from apps.word.models import Dictionary
 
 class Vocabulary(generics.GenericAPIView):
-    queryset = UserWord.objects.all().order_by('-id')
-    serializer_class = UserWordSerializer
+    queryset = Dictionary.objects.all().order_by('-id')
+    serializer_class = DictionarySerializer
     permission_classes = (IsAuthenticated, )
     pagination_class = VocabularyPageNumberPagination
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
-            return UserWordSerializer
+            return DictionarySerializer
         elif self.request.method == 'GET':
-            return UserWordListSerializer
+            return DictionaryListSerializer
         return self.serializer_class
     
     def get_queryset(self):
@@ -27,13 +27,23 @@ class Vocabulary(generics.GenericAPIView):
 
 
 class VocabularyListCreate(generics.ListCreateAPIView, Vocabulary):
-
+    
     def create(self, request, *args, **kwargs):
-        request_user_id = self.request.user.id
+        user = self.request.user
+        self.request.data.update({'user': user.id})
+        
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance = self.perform_create(serializer)
 
-        self.request.data.update({'user': request_user_id})
+        if instance.id is None:
+           return Response(serializer.data, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
 
-        return super().create(request, *args, **kwargs)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        return instance
     
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)

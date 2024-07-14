@@ -8,7 +8,7 @@ from djoser.serializers import UidAndTokenSerializer, UserCreateMixin, UserCreat
 
 from apps.book.models import UserBook
 from apps.user.models import User, Settings
-from apps.word.models import UserWord
+from apps.word.models import Dictionary
 
 
 User = get_user_model()
@@ -65,7 +65,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         return self._get_quantity(UserBook, 'user_id', obj.id)
 
     def get_studied_word(self, obj):
-        return self._get_quantity(UserWord, 'user_id', obj.id)
+        return self._get_quantity(Dictionary, 'user_id', obj.id)
 
     def get_new_word(self, obj):
         user_words_queryset = obj.words.all()

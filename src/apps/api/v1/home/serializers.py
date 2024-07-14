@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.db.models import Q
 
 from apps.book.models import Book
-from apps.word.models import UserWord
+from apps.word.models import Dictionary
 from .utils import get_list_words, get_beginning_day, get_ending_day, get_new_words_today
 
 from django.utils.timezone import localtime
@@ -23,7 +23,7 @@ class HomeSerializer(serializers.Serializer):
         
     def create_initial_data(self):
         
-        user_words = UserWord.objects.filter(user_id = self.user.id)
+        user_words = Dictionary.objects.filter(user_id = self.user.id)
         
         beginning_day = get_beginning_day()
         ending_day = get_ending_day()

@@ -1,25 +1,31 @@
-from typing import Any
+from typing import Any, Type, Union
 from django.http import Http404
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
+from apps.api.v1.training.training import Recognize, Reproduce
+from apps.user.models import User
+
 from .utils import get_time_on_lvl, is_last_level_or_out, is_first_level
 from apps.word.utils import get_current_unix_time
 
-from apps.api.v1.vocabulary.serializers import UserWord
+from apps.word.models import Dictionary
 from .serializers import TrainingWordListSerializer
 
+from config.settings import TRAINING_TYPES
 
-class Training(generics.GenericAPIView):
-    queryset = UserWord.objects.all()
+
+class TrainingView(generics.GenericAPIView):
+    queryset = Dictionary.objects.all()
     serializer_class = TrainingWordListSerializer
-    permission_classes = (IsAuthenticated, )
+    permission_classes = [IsAuthenticated] 
     pagination_class = None
 
     def __init__(self, **kwargs: Any) -> None:
-        self.types = ['recognize', 'reproduce']
+        self.types = TRAINING_TYPES
         super().__init__(**kwargs)
+        
 
     def get_type(self):
         type = self.request.GET.get('type')
@@ -31,24 +37,20 @@ class Training(generics.GenericAPIView):
             raise Http404(detail)
         return type
     
-    def create_filte(self, type: str ):
-        # Формируем имя поля фильтрации для текущего типа тренировки
-        filter_field = type + '_time' + '__lte'
-        # Создаем фильтр для поиска тренировок
-        filter = {
-            "user_id": self.request.user.id,
-            filter_field: get_current_unix_time()
-        }
-        return filter
+    def get_training_class(self, type: str) -> Union[Type[Recognize], Type[Reproduce], None]:
+        return {
+            'recognize': Recognize,
+            'reproduce': Reproduce
+        }.get(type, None)
 
 
-class TrainingListUpdate(Training, generics.ListAPIView, mixins.UpdateModelMixin):
+class TrainingListUpdate(TrainingView, generics.ListAPIView, mixins.UpdateModelMixin):
 
     def get_object(self):
         pk = self.request.data['pk']
 
         try:
-            obj = UserWord.objects.get(id=pk)
+            obj = Dictionary.objects.get(id=pk)
         except:
             detail = f'Связь {pk} не найдена'
             raise Http404(detail)
@@ -56,8 +58,13 @@ class TrainingListUpdate(Training, generics.ListAPIView, mixins.UpdateModelMixin
         return obj
 
     def list(self, request, *args, **kwargs):
+        user: User = self.request.user
         type = self.get_type()
-        user = self.request.user
+        training = self.get_training_class(type=type)
+        training = training(queryset=self.queryset)
+        count_word_in_round = user.settings.count_word_in_round
+        # return Response('f')
+        
         filter = self.create_filte(type=type)
         count_word_in_round = user.settings.count_word_in_round
         
@@ -72,7 +79,6 @@ class TrainingListUpdate(Training, generics.ListAPIView, mixins.UpdateModelMixin
             }
         elif type == 'reproduce':
             kwargs = {"many": True}
-
         serializer = self.get_serializer(self.queryset, **kwargs)
         
         if serializer.data:
@@ -115,7 +121,7 @@ class TrainingListUpdate(Training, generics.ListAPIView, mixins.UpdateModelMixin
         return Response(status=status.HTTP_200_OK)
 
 
-class TrainingInfo(Training):
+class TrainingInfo(TrainingView):
     def get(self, request, *args, **kwargs):
         data = {}
 

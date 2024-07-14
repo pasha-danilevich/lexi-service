@@ -4,7 +4,6 @@ from rest_framework.response import Response
 
 from apps.api.v1.word.serializers import Word, WordSerializer
 
-from config.settings import print_local_var
 from .utils import get_related_pk, clean_string, get_or_create_word
 
 class WordGeneric(generics.GenericAPIView):

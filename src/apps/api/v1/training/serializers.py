@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from apps.api.v1.training.utils import get_false_set
-from apps.word.models import UserWord
+from apps.word.models import Dictionary
 from apps.api.v1.word.serializers import WordSerializer
 
 class TrainingWordListSerializer(serializers.ModelSerializer):
@@ -9,7 +9,7 @@ class TrainingWordListSerializer(serializers.ModelSerializer):
     false_set = serializers.SerializerMethodField()
     
     class Meta:
-        model = UserWord
+        model = Dictionary
         fields = ["pk", "word", "false_set", "recognize_lvl", "reproduce_lvl"]
         
     def __init__(self, *args, **kwargs):

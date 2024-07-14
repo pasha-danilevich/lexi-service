@@ -2,7 +2,7 @@ import re
 
 from apps.api.v1.word.yandex_dictionary import fetch_word_data
 from apps.user.models import User
-from apps.word.models import Meaning, Synonym, Translation, UserWord, Word
+from apps.word.models import Meaning, Synonym, Translation, Dictionary, Word
 
 
 def clean_string(text) -> str:
@@ -84,5 +84,5 @@ def get_related_pk(word: Word, user: User):
         try:
             word = words_releted_user.filter(word_id=word.id).first()
             return word.pk
-        except UserWord.DoesNotExist:
+        except Dictionary.DoesNotExist:
             return None

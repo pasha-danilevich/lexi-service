@@ -21,7 +21,7 @@ def get_new_words_today(user_words, beginning_day, ending_day):
     Получает новые слова, добавленные сегодня для данного пользователя.
     
     Аргументы:
-        user_words (QuerySet): Queryset объектов UserWord для данного пользователя.
+        dictionary (QuerySet): Queryset объектов Dictionary для данного пользователя.
         beginning_day (datetime): Начало текущего дня.
         ending_day (datetime): Конец текущего дня.
         
