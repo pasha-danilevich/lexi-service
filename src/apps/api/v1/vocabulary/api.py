@@ -1,9 +1,10 @@
-import inspect
+from django.db import transaction
+
 from rest_framework import generics,  status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
-from .utils import get_words_count_on_levels
+from .utils import create_traning_for_word, get_words_count_on_levels
 from .serializers import DictionarySerializer, DictionaryListSerializer
 from .pagination import VocabularyPageNumberPagination
 from apps.word.models import Dictionary
@@ -28,22 +29,27 @@ class Vocabulary(generics.GenericAPIView):
 
 class VocabularyListCreate(generics.ListCreateAPIView, Vocabulary):
     
+    
+    def perform_create(self, serializer: DictionarySerializer):
+        instance = serializer.save()
+        return instance
+    
     def create(self, request, *args, **kwargs):
         user = self.request.user
         self.request.data.update({'user': user.id})
         
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        instance = self.perform_create(serializer)
+        
+        try:
+            with transaction.atomic():
+                instance = self.perform_create(serializer)
+                create_traning_for_word(instance)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
-        if instance.id is None:
-           return Response(serializer.data, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def perform_create(self, serializer):
-        instance = serializer.save()
-        return instance
     
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)

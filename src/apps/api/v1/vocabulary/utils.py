@@ -1,3 +1,7 @@
+from apps.word.models import Training, TrainingType
+from apps.word.utils import get_current_unix_time
+
+
 def _count_occurrences(arr, n):
     result = [0] * n
     for num in arr:
@@ -11,9 +15,10 @@ def get_words_count_on_levels(type: str, levels_length: int, queryset) -> list:
     result = _count_occurrences(lvl_list, levels_length)
     return result
 
-# def get_words_count_on_levels(type: str, levels_length: int, queryset) -> list:
-#     lvl_list = []
-#     for lvl in range(1, levels_length + 1):
-#         words_count = queryset.filter(**{type: lvl}).count()
-#         lvl_list.append(words_count)
-#     return lvl_list
+def create_traning_for_word(word):
+
+    time = get_current_unix_time()
+    type_queryset = TrainingType.objects.all()
+    
+    data = [{'dictionary': word, 'type': type, 'time': time} for type in type_queryset]
+    Training.objects.bulk_create([Training(**item) for item in data])    

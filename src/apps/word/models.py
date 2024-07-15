@@ -70,7 +70,7 @@ class Dictionary(models.Model):
         unique_together = ('user', 'word', 'translation',)
 
     def __str__(self) -> str:
-        return f"User: {self.user} add {self.word}"
+        return f"User: {self.user} add {self.word} - {self.translation}"
 
 
 class Training(models.Model):
@@ -98,18 +98,3 @@ class TrainingType(models.Model):
 
 
 
-@receiver(post_save, sender=Dictionary)
-def create_training(sender, instance, created, **kwargs):
-    if created:
-        try:
-            time = get_current_unix_time()
-            type_queryset = TrainingType.objects.all()
-            objs = [Training(dictionary=instance, type=type, time=time) for type in type_queryset]    
-            Training.objects.bulk_create(objs)
-        except:
-            from django.db import transaction
-            print("Ошибка при создании тренировок для Dictionary %s", instance.id)
-            with transaction.atomic():
-                instance.delete()
-            # Можно также добавить логирование ошибки
-            
