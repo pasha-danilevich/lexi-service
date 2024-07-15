@@ -12,7 +12,7 @@ from apps.word.models import Dictionary, TrainingType
 from config.settings import TRAINING_TYPES
 
 class Vocabulary(generics.GenericAPIView):
-    queryset = Dictionary.objects.all().order_by('-id')
+    queryset = Dictionary.objects.all().order_by('-id').prefetch_related('training')
     serializer_class = DictionarySerializer
     permission_classes = (IsAuthenticated, )
     pagination_class = VocabularyPageNumberPagination
@@ -80,7 +80,7 @@ class VocabularyStats(generics.ListAPIView, Vocabulary):
         user = self.request.user
         levels_length = len(user.settings.levels)
         type_queryset = TrainingType.objects.all()
-        dictionary = self.get_queryset().prefetch_related('training')
+        dictionary = self.get_queryset()
         
         data = {type.name: self.get_value(type.id, dictionary, levels_length) for type in type_queryset}
 
