@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import generics, mixins, status
 from rest_framework.permissions import IsAuthenticated
 
-from apps.api.v1.book.utils import get_user_bookmark
+from apps.api.v1.book.services import get_user_bookmark
 from apps.book.models import Book, UserBook
 from apps.book.utils import json_to_book
 

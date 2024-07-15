@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from apps.api.v1.book.utils import get_start_end, get_user_bookmark
+from apps.api.v1.book.services import get_start_end, get_user_bookmark
 from apps.book.models import Book, UserBook
 from apps.user.models import User
 from config.settings import PAGE_SLICE_SIZE
