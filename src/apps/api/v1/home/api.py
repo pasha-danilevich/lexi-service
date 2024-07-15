@@ -15,7 +15,7 @@ class HomeView(generics.GenericAPIView):
     
     
     def get(self, request):
-        
+        print(self.queryset.get_new_words_today())
         serializer = self.get_serializer()
         serializer.is_valid()
         

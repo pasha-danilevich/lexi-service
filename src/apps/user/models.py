@@ -21,6 +21,8 @@ class User(AbstractUser):
     is_active = models.BooleanField("active", default=True)
     activated_email = models.BooleanField("activated_email", default=False)
     email = models.EmailField("email address", blank=False, unique=True)
+    
+    settings: "Settings"
 
     USERNAME_FIELD = "username"
     EMAIL_FIELD = "email"
@@ -40,7 +42,7 @@ class Settings(models.Model):
     ]
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='settings')
-    levels = models.JSONField(default=levels_default, null=False)
+    levels: list[int] | models.JSONField = models.JSONField(default=levels_default, null=False)
     theme = models.CharField(max_length=20, choices=THEME_CHOICES, default='light')
     count_word_in_round = models.IntegerField(default=10, null=False)
     number_of_false_set = models.IntegerField(default=3, null=False)

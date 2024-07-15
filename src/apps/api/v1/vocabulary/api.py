@@ -1,8 +1,11 @@
+from typing import cast
 from django.db import transaction
 
 from rest_framework import generics,  status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+
+from apps.user.models import User
 
 from .utils import create_traning_for_word, get_words_count_on_levels
 from .serializers import DictionarySerializer, DictionaryListSerializer
@@ -25,7 +28,7 @@ class Vocabulary(generics.GenericAPIView):
         return self.serializer_class
     
     def get_queryset(self):
-        queryset = self.queryset.filter(user_id=self.request.user.id)
+        queryset = self.queryset.filter(user_id=self.request.user.pk)
         return queryset
 
 
@@ -38,7 +41,8 @@ class VocabularyListCreate(generics.ListCreateAPIView, Vocabulary):
     
     def create(self, request, *args, **kwargs):
         user = self.request.user
-        self.request.data.update({'user': user.id})
+        data = self.request.POST.dict()
+        data = {**data, 'user': user.pk}
         
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -76,12 +80,13 @@ class VocabularyStats(generics.ListAPIView, Vocabulary):
         )
         return value
 
-    def list(self, request, *args, **kwargs):
-        user = self.request.user
+
+    def list(self, *args, **kwargs):
+        user = cast(User, self.request.user)
         levels_length = len(user.settings.levels)
         type_queryset = TrainingType.objects.all()
         dictionary = self.get_queryset()
         
-        data = {type.name: self.get_value(type.id, dictionary, levels_length) for type in type_queryset}
+        data = {type.name: self.get_value(type.pk, dictionary, levels_length) for type in type_queryset}
 
         return Response(data, status=status.HTTP_200_OK)

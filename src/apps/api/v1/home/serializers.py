@@ -3,7 +3,7 @@ from django.db.models import Q
 
 from apps.book.models import Book
 from apps.word.models import Dictionary
-from .services import get_list_words, get_new_words_today
+from .services import get_list_words
 
 from django.utils.timezone import localtime
 
@@ -23,11 +23,11 @@ class HomeSerializer(serializers.Serializer):
         
     def create_initial_data(self):
         
-        dictionary = Dictionary.objects.filter(user_id = self.user.id).order_by('-id')
-        upload_books = Book.objects.filter(author_upload=self.user.id)
-    
-        new_words_today = get_new_words_today(dictionary)
+        dictionary = Dictionary.objects.get_user_words(self.user.id).order_by('-id')
         
+        new_words_today = dictionary.get_new_words_today()
+        
+        upload_books = Book.objects.filter(author_upload=self.user.id)
         
         data = {
             'learning_words': dictionary.all().count(),

@@ -1,4 +1,7 @@
+from datetime import datetime, timedelta
 from django.db import models
+
+from apps.word.managers import DictionaryCustomManager
 
 from .utils import get_current_unix_time
 from config.settings import TRAINING_TYPES
@@ -65,6 +68,12 @@ class Dictionary(models.Model):
                                     on_delete=models.CASCADE, blank=False, null=False)
 
     date_added = models.DateTimeField(auto_now_add=True)
+    
+    training: "Training"
+    
+    objects: DictionaryCustomManager = DictionaryCustomManager()
+    
+    
 
     class Meta:
         unique_together = ('user', 'word', 'translation',)

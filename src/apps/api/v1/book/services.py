@@ -1,9 +1,10 @@
+from django.http import HttpRequest
 from apps.book.models import Book, UserBook
 from apps.user.models import User
 from config.settings import PAGE_SLICE_SIZE
 
 
-def _get_page_from_context(context: dict[any, any]) -> int:
+def _get_page_from_context(context: dict[str, HttpRequest]) -> int:
     """
     Извлекает номер страницы из контекста запроса.
     
@@ -48,7 +49,7 @@ def get_start_end(context, obj: Book):
     
     return (start, end)
 
-def get_user_bookmark(obj, user: User) -> dict[str, int]:
+def get_user_bookmark(obj, user: User) -> dict[str, int] | None:
     """
     Функция проверяет, является ли пользователь анонимным, и если да, возвращает None.
     Если пользователь не анонимный, функция пытается получить объект UserBook для данной книги и пользователя.

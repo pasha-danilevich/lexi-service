@@ -1,3 +1,4 @@
+from typing import cast
 from django.shortcuts import redirect
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -7,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from apps.api.v1.book.services import get_user_bookmark
 from apps.book.models import Book, UserBook
 from apps.book.utils import json_to_book
+from apps.user.models import User
 
 from .pagination import BookListPageNumberPagination, BookmarkPageNumberPagination
 from .serializers import BookListCreateSerializer, BookRetrieveSerializer, BookmarkListSerializer, BookmarkRetrieveCreateSerializer
@@ -34,7 +36,7 @@ class BookRetrieve(generics.RetrieveAPIView, GenericBook):
     
     def get(self, request, page, *args, **kwargs):
         obj: Book = super().get_object()
-        user = self.request.user
+        user = cast(User, self.request.user)
         url_page = page
         bookmark = get_user_bookmark(obj, user = user)
         serializer = self.get_serializer(obj)
@@ -56,7 +58,7 @@ class BookmarkListCreate(generics.ListCreateAPIView, mixins.DestroyModelMixin):
     pagination_class = BookmarkPageNumberPagination
 
     def get_queryset(self):
-        return UserBook.objects.filter(user_id=self.request.user.id).order_by('-id')
+        return UserBook.objects.filter(user_id=self.request.user.pk).order_by('-id')
 
     def post(self, request, *args, **kwargs):
         user = request.user
