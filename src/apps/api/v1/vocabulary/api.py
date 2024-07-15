@@ -7,7 +7,9 @@ from rest_framework.permissions import IsAuthenticated
 from .utils import create_traning_for_word, get_words_count_on_levels
 from .serializers import DictionarySerializer, DictionaryListSerializer
 from .pagination import VocabularyPageNumberPagination
-from apps.word.models import Dictionary
+from apps.word.models import Dictionary, TrainingType
+
+from config.settings import TRAINING_TYPES
 
 class Vocabulary(generics.GenericAPIView):
     queryset = Dictionary.objects.all().order_by('-id')
@@ -62,21 +64,24 @@ class VocabularyDelete(generics.DestroyAPIView, Vocabulary):
 
 class VocabularyStats(generics.ListAPIView, Vocabulary):
 
-    def get_value(self, type):
-        user = self.request.user
-        levels_length = len(user.settings.levels)
-
-        user_words_queryset = self.get_queryset()
+    def get_value(self, type, dictionary, levels_length):
+        training_list = []
+        
+        for word in dictionary:
+            training_list.extend(word.training.filter(type=type))
+            
         value = get_words_count_on_levels(
-            type=type + '_lvl',
             levels_length=levels_length,
-            queryset=user_words_queryset
+            training_list=training_list
         )
         return value
 
     def list(self, request, *args, **kwargs):
-
-        types = ('recognize', 'reproduce', )
-        data = {type: self.get_value(type) for type in types}
+        user = self.request.user
+        levels_length = len(user.settings.levels)
+        type_queryset = TrainingType.objects.all()
+        dictionary = self.get_queryset().prefetch_related('training')
+        
+        data = {type.name: self.get_value(type.id, dictionary, levels_length) for type in type_queryset}
 
         return Response(data, status=status.HTTP_200_OK)
