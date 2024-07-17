@@ -1,4 +1,5 @@
 from typing import cast
+from django.db import IntegrityError
 from django.shortcuts import redirect
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -22,12 +23,22 @@ class BookListCreate(generics.ListCreateAPIView, GenericBook):
     pagination_class = BookListPageNumberPagination
     permission_classes = [IsAuthenticatedOrReadOnly]
     
-    def post(self, request, *args, **kwargs):
-        book = json_to_book(request.data['book'])
-        request.data['book'] = book
-        request.data['page_count'] = len(book)
-        request.data['author_upload'] = request.user.id
-        return super().post(request, *args, **kwargs)
+    def post(self, request, *args, **kwargs):    
+        
+        if len(request.data['book']) == 0:  
+            data = {'book': 'Это поле не может быть пустым'}  
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)    
+        
+        book = json_to_book(request.data['book'])  
+        request.data['book'] = book  
+        request.data['page_count'] = len(book)  
+        request.data['author_upload'] = request.user.id  
+        
+        try:  
+            return super().post(request, *args, **kwargs) 
+        except IntegrityError:  
+            data = {'details': 'Книга с таким название и автором уже существует'}  
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
     
 class BookRetrieve(generics.RetrieveAPIView, GenericBook):
     serializer_class = BookRetrieveSerializer

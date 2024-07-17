@@ -1,6 +1,8 @@
+from typing import cast
 from rest_framework import serializers
 from apps.api.v1.book.services import get_start_end, get_user_bookmark
 from apps.book.models import Book, UserBook
+from apps.book.utils import json_to_book
 from apps.user.models import User
 from config.settings import PAGE_SLICE_SIZE
 
@@ -38,7 +40,7 @@ class BookmarkListSerializer(serializers.ModelSerializer):
 
     def get_book_cover(self, obj):
         book_serializer = BookListCreateSerializer(obj.book)
-        book_data = book_serializer.data
+        book_data = cast(dict, book_serializer.data)
         data = {
             "title": book_data['title'],
             "author": book_data['author'],
