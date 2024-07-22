@@ -24,8 +24,9 @@ class BookListCreate(generics.ListCreateAPIView, GenericBook):
     permission_classes = [IsAuthenticatedOrReadOnly]
     
     def post(self, request, *args, **kwargs):    
-        
-        if len(request.data['book']) == 0:  
+        book = request.data.get('book')
+
+        if not book or len(book) == 0:  
             data = {'book': 'Это поле не может быть пустым'}  
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)    
         

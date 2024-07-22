@@ -1,8 +1,9 @@
+from typing import Dict, Optional, overload
 from django.http import HttpRequest
 from apps.book.models import Book, UserBook
 from apps.user.models import User
 from config.settings import PAGE_SLICE_SIZE
-
+from django.contrib.auth.models import AnonymousUser
 
 def _get_page_from_context(context: dict[str, HttpRequest]) -> int:
     """
@@ -49,13 +50,16 @@ def get_start_end(context, obj: Book):
     
     return (start, end)
 
-def get_user_bookmark(obj, user: User) -> dict[str, int] | None:
+@overload
+def get_user_bookmark(obj, user: AnonymousUser) -> None:
+    ...
+
+@overload
+def get_user_bookmark(obj, user: User) -> Dict[str, int]:
+    ...
+
+def get_user_bookmark(obj, user):
     """
-    Функция проверяет, является ли пользователь анонимным, и если да, возвращает None.
-    Если пользователь не анонимный, функция пытается получить объект UserBook для данной книги и пользователя.
-    Если объект не найден, возвращается None.
-    Если объект найден, возвращается словарь с полями pk и target_page.
-    
     Аргументы:
         obj (Book): Объект книги.
         user (User): Объект пользователя.

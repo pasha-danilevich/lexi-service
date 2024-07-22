@@ -16,39 +16,6 @@ common_book_fields = [
     'slug',
 ]
 
-class BookmarkRetrieveCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserBook
-        fields = [
-            'pk',
-            'book'
-            'target_page'
-        ]
-        extra_kwargs = {
-            'book': {'write_only': True}
-        }
-
-
-class BookmarkListSerializer(serializers.ModelSerializer):
-
-    book_cover = serializers.SerializerMethodField()
-
-    class Meta:
-        model = UserBook
-        fields = ['pk', 'book_cover', 'target_page']
-        extra_kwargs = {'book_cover': {'read_only': True}}
-
-    def get_book_cover(self, obj):
-        book_serializer = BookListCreateSerializer(obj.book)
-        book_data = cast(dict, book_serializer.data)
-        data = {
-            "title": book_data['title'],
-            "author": book_data['author'],
-            "slug": book_data['slug'],
-            "book_id": book_data['pk']
-        }
-        return data
-
 
 class BookListCreateSerializer(serializers.ModelSerializer):
 
@@ -85,7 +52,7 @@ class BookRetrieveSerializer(serializers.ModelSerializer):
         user: User = self.context['request'].user
         return get_user_bookmark(obj, user)
 
-    
+     
     def get_slice_length(self, obj):
         return PAGE_SLICE_SIZE
 
@@ -97,3 +64,36 @@ class BookRetrieveSerializer(serializers.ModelSerializer):
         start, end = get_start_end(self.context, obj)
         pages_set = obj.book[start:end]
         return pages_set
+    
+class BookmarkRetrieveCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserBook
+        fields = [
+            'pk',
+            'book'
+            'target_page'
+        ]
+        extra_kwargs = {
+            'book': {'write_only': True}
+        }
+
+
+class BookmarkListSerializer(serializers.ModelSerializer):
+
+    book_cover = serializers.SerializerMethodField()
+
+    class Meta:
+        model = UserBook
+        fields = ['pk', 'book_cover', 'target_page']
+        extra_kwargs = {'book_cover': {'read_only': True}}
+
+    def get_book_cover(self, obj):
+        serializer = BookListCreateSerializer(obj.book)
+        book_data = cast(dict, serializer.data)
+        data = {
+            "title": book_data['title'],
+            "author": book_data['author'],
+            "slug": book_data['slug'],
+            "book_id": book_data['pk']
+        }
+        return data

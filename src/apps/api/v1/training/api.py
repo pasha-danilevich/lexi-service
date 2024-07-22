@@ -1,4 +1,4 @@
-from typing import Any, Type, Union
+from typing import Any, Type, Union, cast
 from django.http import Http404
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
@@ -10,7 +10,7 @@ from apps.user.models import User
 from .utils import get_time_on_lvl, is_last_level_or_out, is_first_level
 from apps.word.utils import get_current_unix_time
 
-from apps.word.models import Dictionary
+from apps.word.models import Dictionary, Training
 from .serializers import TrainingWordListSerializer
 
 from config.settings import TRAINING_TYPES
@@ -37,18 +37,19 @@ class TrainingView(generics.GenericAPIView):
             raise Http404(detail)
         return type
     
-    def get_training_class(self, type: str) -> Union[Type[Recognize], Type[Reproduce], None]:
+    def get_training_class(self, type: str) -> Union[Type[Recognize], Type[Reproduce], Training]:
         return {
             'recognize': Recognize,
             'reproduce': Reproduce
-        }.get(type, None)
+        }.get(type, Training)
 
 
 class TrainingListUpdate(TrainingView, generics.ListAPIView, mixins.UpdateModelMixin):
 
     def get_object(self):
-        pk = self.request.data['pk']
-
+        data = self.request.POST.dict()
+        pk = data['pk']
+        
         try:
             obj = Dictionary.objects.get(id=pk)
         except:
@@ -58,7 +59,7 @@ class TrainingListUpdate(TrainingView, generics.ListAPIView, mixins.UpdateModelM
         return obj
 
     def list(self, request, *args, **kwargs):
-        user: User = self.request.user
+        user: User = cast(User, self.request.user)
         type = self.get_type()
         training = self.get_training_class(type=type)
         training = training(queryset=self.queryset)
