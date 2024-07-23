@@ -38,45 +38,6 @@ class CustomUserCreatePasswordRetypeSerializer(CustomUserCreateMixin, UserCreate
 
 
 
-def _get_list_words(queryset):
-    word_list = []
-    for user_word_relationship in queryset:
-        word = user_word_relationship.word
-        translation = word.translations.first()
-        obj = {
-            'text': word.text,
-            'translation': translation.text
-        }
-
-        word_list.append(obj)
-    return word_list
-
-
-class ProfileSerializer(serializers.ModelSerializer):
-    upload_book = serializers.SerializerMethodField()
-    studied_word = serializers.SerializerMethodField()
-    new_word = serializers.SerializerMethodField()
-
-    class Meta:
-        model = User
-        fields = ['username', 'upload_book', 'studied_word', 'new_word']
-
-    def get_upload_book(self, obj):
-        return self._get_quantity(UserBook, 'user_id', obj.id)
-
-    def get_studied_word(self, obj):
-        return self._get_quantity(Dictionary, 'user_id', obj.id)
-
-    def get_new_word(self, obj):
-        user_words_queryset = obj.words.all()
-        return _get_list_words(user_words_queryset)
-    
-    def _get_quantity(self, cls, field, value):
-        return cls.objects.filter(**{field: value}).count()
-
-
-
-
 
 class SettingsSerializer(serializers.ModelSerializer):
     levels = serializers.ListField(

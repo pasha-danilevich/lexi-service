@@ -1,3 +1,4 @@
+from typing import cast
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -30,14 +31,14 @@ class UserActivate(UserViewSet):
     @action(["post"], detail=False)
     def activation(self, request, uid, token, *args, **kwargs):
 
-        self.request.data.update(
+        self.request.data.update( # type: ignore
             {
                 "uid": uid,
                 "token": token
             }
         )
         response = super().activation(request, *args, **kwargs)
-        user = self.request.user
+        user = cast(User, self.request.user)
         user.activated_email = True
         user.save()
         return response
@@ -61,8 +62,8 @@ class UserActivate(UserViewSet):
     @action(["post"], detail=False)
     def set_email(self, request, *args, **kwargs):
         
-        user: User = self.request.user
-        email: str = self.request.data.get('email', None)
+        user = cast(User, self.request.user)
+        email: str = self.request.data.get('email', None) # type: ignore
         
         if not email:
             return Response(data="Email не был передан", status=status.HTTP_400_BAD_REQUEST)
@@ -92,7 +93,9 @@ class SettingsPageView(generics.GenericAPIView):
         return Response(serializer.data)
     
     def put(self, request, *args, **kwargs):
-        instance = self.request.user.settings  # Получаем экземпляр настроек пользователя
+        user = cast(User, self.request.user)
+        
+        instance = user.settings  # Получаем экземпляр настроек пользователя
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
