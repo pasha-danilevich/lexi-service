@@ -18,6 +18,8 @@ class Word(models.Model):
     transcription = models.CharField(
         max_length=100, null=True, blank=True)  # Транскрипция
 
+    translations: 'Translation'
+    
     def __str__(self):
         return self.text
 

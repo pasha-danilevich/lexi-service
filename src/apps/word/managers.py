@@ -2,7 +2,9 @@ from datetime import datetime, timedelta
 from django.db import models
 
 class DictionaryQuerySet(models.QuerySet):
-    def get_user_words(self, user_id):
+    def all(self, user_id: int):
+        if not user_id:
+            return self.filter()
         return self.filter(user_id=user_id)
     
     def get_new_words_today(self):
@@ -22,8 +24,8 @@ class DictionaryCustomManager(models.Manager):
     def get_queryset(self):
         return DictionaryQuerySet(self.model, using=self._db)
     
-    def get_user_words(self, user_id):
-        return self.get_queryset().get_user_words(user_id=user_id)
+    def all(self, user_id):
+        return self.get_queryset().all(user_id)
     
     def get_new_words_today(self):
         return self.get_queryset().get_new_words_today()
