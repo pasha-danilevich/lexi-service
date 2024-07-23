@@ -8,7 +8,7 @@ from django.urls import reverse
 import requests
 import signal
 
-from apps.api.v1.word.utils import clean_string
+from apps.api.v1.word.services import clean_string
 from apps.word.models import Word
 
 django.setup()

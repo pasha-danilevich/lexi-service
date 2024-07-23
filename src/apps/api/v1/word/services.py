@@ -1,11 +1,9 @@
 from django.db import transaction
 import re
-from typing import cast
 
 from apps.api.v1.word.yandex_dictionary import fetch_word_data
 from apps.user.models import User
-from apps.word.managers import DictionaryQuerySet
-from apps.word.models import Meaning, Synonym, Translation, Dictionary, Word
+from apps.word.models import Meaning, Synonym, Translation, Word
 
 
 def clean_string(text) -> str:

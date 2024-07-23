@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from apps.api.v1.word.serializers import Word, WordSerializer
 from apps.user.models import User
 
-from .utils import get_related_pk, clean_string, get_or_create_word
+from .services import get_related_pk, clean_string, get_or_create_word
 
 class WordGeneric(generics.GenericAPIView):
     queryset = Word.objects.all()

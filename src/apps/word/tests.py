@@ -1,7 +1,7 @@
 import pprint
 from django.test import TestCase
 
-from apps.api.v1.word.utils import get_or_create_word, word_list_create
+from apps.api.v1.word.services import get_or_create_word, word_list_create
 from apps.api.v1.word.yandex_dictionary import fetch_word_data
 from apps.user.models import User
 from apps.word.utils import get_current_unix_time
