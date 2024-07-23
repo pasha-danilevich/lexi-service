@@ -41,10 +41,10 @@ class VocabularyListCreate(generics.ListCreateAPIView, Vocabulary):
     
     def create(self, request, *args, **kwargs):
         user = self.request.user
-        data = self.request.POST.dict()
+        data = self.request.data # type: ignore
         data = {**data, 'user': user.pk}
         
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         
         try:

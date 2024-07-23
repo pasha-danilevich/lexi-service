@@ -1,7 +1,5 @@
 from rest_framework import serializers
-from apps.api.v1.training.utils import get_false_set
 from apps.word.models import Dictionary, Training
-from apps.api.v1.word.serializers import WordSerializer
 
 
 class DictionarySerializer(serializers.ModelSerializer):
