@@ -19,10 +19,12 @@ class BaseTrainingListSerializer(serializers.ModelSerializer):
 
     def get_word(self, obj: Dictionary):
         word = cast(Word, obj.word)
+        print(word)
         fields = ('pk', 'text', 'part_of_speech', 'transcription')
         serializers = WordSerializer(word, fields=fields)
         data = serializers.data
-        data.update({'translation': word.translations.first().text}) # type: ignore
+
+        data.update({'translation': obj.translation.text}) # type: ignore
         return data
 
     def get_training(self, obj):

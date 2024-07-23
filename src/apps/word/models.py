@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import cast
 from django.db import models
 
 from apps.word.managers import DictionaryCustomManager, DictionaryQuerySet
@@ -69,8 +70,8 @@ class Dictionary(models.Model):
                              on_delete=models.CASCADE, blank=False, null=False)
     word = models.ForeignKey("word.Word", related_name='dictionary',
                              on_delete=models.CASCADE, blank=False, null=False)
-    translation = models.ForeignKey("word.Translation", related_name='users',
-                                    on_delete=models.CASCADE, blank=False, null=False)
+    translation = cast(Translation, models.ForeignKey("word.Translation", related_name='users',
+                                    on_delete=models.CASCADE, blank=False, null=False))
 
     date_added = models.DateTimeField(auto_now_add=True)
     
