@@ -9,13 +9,11 @@ from .serializers import HomeSerializer
 
 
 class HomeView(generics.GenericAPIView):
-    queryset = Dictionary.objects.all().order_by('-id')
     permission_classes = [IsAuthenticated] 
     serializer_class = HomeSerializer
     
     
     def get(self, request):
-        print(self.queryset.get_new_words_today())
         serializer = self.get_serializer()
         serializer.is_valid()
         
