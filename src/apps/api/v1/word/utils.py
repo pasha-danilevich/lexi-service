@@ -1,7 +1,9 @@
 import re
+from typing import cast
 
 from apps.api.v1.word.yandex_dictionary import fetch_word_data
 from apps.user.models import User
+from apps.word.managers import DictionaryQuerySet
 from apps.word.models import Meaning, Synonym, Translation, Dictionary, Word
 
 
@@ -73,16 +75,17 @@ def get_or_create_word(request_word: str) -> tuple[Word | None, bool]:
 
 
 
-def get_related_pk(word: Word, user: User):
-    # Проверяем, есть ли у слова связанные пользователи
-    if word.users.exists():
+def get_related_pk(word: Word, user: User) -> list[int]:
+    
+    # Получаем все слова из словаря пользователя
+    user_dictionary_words = word.dictionary.all(user_id=user.pk)
+    print(user_dictionary_words)
 
-        # Получаем все слова, связанные с данным пользователем
-        words_releted_user = user.words.all()
-
-        # Пробуем получить среди связанных слов пользователя это самое слово
-        try:
-            word = words_releted_user.filter(word_id=word.id).first()
-            return word.pk
-        except Dictionary.DoesNotExist:
-            return None
+    if user_dictionary_words:
+        # Возвращаем список первичных ключей переводов, которые добавлял пользователь
+        return [
+            dictionary_word.translation.pk 
+            for dictionary_word in user_dictionary_words
+            ]
+    else:
+        return []

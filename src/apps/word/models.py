@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from django.db import models
 
-from apps.word.managers import DictionaryCustomManager
+from apps.word.managers import DictionaryCustomManager, DictionaryQuerySet
 
 from .utils import get_current_unix_time
 from config.settings import TRAINING_TYPES
@@ -19,6 +19,9 @@ class Word(models.Model):
         max_length=100, null=True, blank=True)  # Транскрипция
 
     translations: 'Translation'
+    synonyms: 'Synonym'
+    meanings: 'Meaning'
+    dictionary: 'DictionaryQuerySet'
     
     def __str__(self):
         return self.text
@@ -64,7 +67,7 @@ class Meaning(models.Model):
 class Dictionary(models.Model):
     user = models.ForeignKey("user.User", related_name='words',
                              on_delete=models.CASCADE, blank=False, null=False)
-    word = models.ForeignKey("word.Word", related_name='users',
+    word = models.ForeignKey("word.Word", related_name='dictionary',
                              on_delete=models.CASCADE, blank=False, null=False)
     translation = models.ForeignKey("word.Translation", related_name='users',
                                     on_delete=models.CASCADE, blank=False, null=False)
