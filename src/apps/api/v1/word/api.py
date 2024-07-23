@@ -21,9 +21,12 @@ class WordCreate(WordGeneric, mixins.CreateModelMixin):
 
         if not request_word:
             return Response(data='Слово не передано', status=status.HTTP_400_BAD_REQUEST)
-
-        word, created = get_or_create_word(request_word)
-
+        
+        try:
+            word, created = get_or_create_word(request_word)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
         if not word:
             return Response(data='Объект не найден и нет данных о слове', status=status.HTTP_404_NOT_FOUND)
         
@@ -67,8 +70,7 @@ def googletrans(request):
 
     try:
         translation = translator.translate(text, dest=dest_language)
-        print(translation)
-        translated_text = translation.text
+        translated_text = translation.text # type: ignore
         return Response({'translated_text': translated_text}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'error': f"Translation error: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

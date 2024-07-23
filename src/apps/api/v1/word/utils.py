@@ -1,3 +1,4 @@
+from django.db import transaction
 import re
 from typing import cast
 
@@ -63,12 +64,18 @@ def get_or_create_word(request_word: str) -> tuple[Word | None, bool]:
 
         if not word_set:
             return None, False
+        
+        try:
+            with transaction.atomic():
+                word = Word.objects.create(**word_set['word'])
 
-        word = Word.objects.create(**word_set['word'])
-
-        word_bulk_create(Translation, word_set['translation'], word)
-        word_bulk_create(Synonym, word_set['synonym'], word)
-        word_bulk_create(Meaning, word_set['meaning'], word)
+                word_bulk_create(Translation, word_set['translation'], word)
+                word_bulk_create(Synonym, word_set['synonym'], word)
+                word_bulk_create(Meaning, word_set['meaning'], word)
+                
+        except Exception as e:
+            raise e
+        
 
         return word, created
 

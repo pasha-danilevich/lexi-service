@@ -38,10 +38,10 @@ def fetch_word_data(word: str):
     
     
     
-    if not response.status_code == 200:
+    if not response.status_code == 200: # type: ignore
         return None
 
-    json_data = response.json()
+    json_data = response.json() # type: ignore
     is_empty_response = False if json_data['def'] else True
     
     
@@ -88,7 +88,7 @@ def extract_word(json: dict) -> dict:
     return convert_dict_value_to_lowercase(obj)
 
 
-def extract_translation(json: dict) -> dict:
+def extract_translation(json: dict) -> list | None:
     words = json['def']
     # тут может быть множество переводов
     translations_list = []
@@ -112,7 +112,7 @@ def extract_translation(json: dict) -> dict:
     return translations_list
 
 
-def extract_synonym(json: dict) -> dict:
+def extract_synonym(json: dict) -> list | None:
     words = json['def']
     # тут может быть множество переводов
     synonyms_list = []
@@ -143,7 +143,7 @@ def extract_synonym(json: dict) -> dict:
     return synonyms_list
 
 
-def extract_meaning(json: dict) -> dict:
+def extract_meaning(json: dict) -> list | None:
     words = json['def']
     # тут может быть множество переводов
     meaning_list = []
