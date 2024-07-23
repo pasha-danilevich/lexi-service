@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from apps.api.v1.training.serializers import RecognizeListSerializer, ReproduceListSerializer
 from apps.user.models import User
 
-from .utils import get_new_lvl, get_new_time
+from .services import get_new_lvl, get_new_time
 
 from apps.word.models import Dictionary, Training
 

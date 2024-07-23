@@ -1,6 +1,6 @@
 from typing import cast
 from rest_framework import serializers
-from apps.api.v1.training.utils import get_false_set
+from apps.api.v1.training.services import get_false_set
 from apps.word.models import Dictionary, Training, Word
 from apps.api.v1.word.serializers import WordSerializer
 
