@@ -15,7 +15,7 @@ from apps.word.models import Dictionary, TrainingType
 from config.settings import TRAINING_TYPES
 
 class Vocabulary(generics.GenericAPIView):
-    queryset = Dictionary.objects.all().order_by('-id').prefetch_related('training')
+    queryset = Dictionary.objects.all(None).order_by('-id').prefetch_related('training')
     serializer_class = DictionarySerializer
     permission_classes = (IsAuthenticated, )
     pagination_class = VocabularyPageNumberPagination
