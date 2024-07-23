@@ -23,18 +23,17 @@ class HomeSerializer(serializers.Serializer):
         
     def create_initial_data(self):
         
-        dictionary = Dictionary.objects.get_user_words(self.user.id).order_by('-id')
-        
+        dictionary = Dictionary.objects.all(self.user.id).order_by('-id')   
         new_words_today = dictionary.get_new_words_today()
-        
         upload_books = Book.objects.filter(author_upload=self.user.id)
         
         data = {
-            'learning_words': dictionary.all().count(),
+            'learning_words': dictionary.count(),
             'new_words_today': new_words_today.count(),
             'upload_books': upload_books.count(),
             'recently_added_words': get_list_words(dictionary=dictionary[:5])
         }
+        
         return data
         
             
