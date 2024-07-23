@@ -107,20 +107,16 @@ class TrainingListUpdate(TrainingView, generics.ListAPIView, mixins.UpdateModelM
 
 
 class TrainingInfo(TrainingView):
-    ...
-#     def get(self, request, *args, **kwargs):
-#         data = {}
+    def get(self, request, *args, **kwargs):
+        user = self.request.user
+        data = {}
+        queryset = Dictionary.objects.all(user_id=user.pk)
 
-#         # Проходимся по всем типам тренировок
-#         for type in self.types:
-#             filter = self.create_filte(type)
-#             # Считаем количество тренировок для текущего типа
-#             count_word_to_training_recognize = self.queryset.filter(
-#                 **filter).count()
+        for type in self.types:
+            word_to_training = queryset.current(type_id=TRAINING_TYPES_ID[type])
 
-#             # Добавляем данные в словарь
-#             data.update(
-#                 {f'count_word_to_training_{type}': count_word_to_training_recognize}
-#             )
+            data.update(
+                {f'count_word_to_training_{type}': word_to_training.count()}
+            )
 
-#         return Response(status=status.HTTP_200_OK, data=data)
+        return Response(status=status.HTTP_200_OK, data=data)
