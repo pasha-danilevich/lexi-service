@@ -7,7 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from apps.user.models import User
 
-from .utils import create_traning_for_word, get_words_count_on_levels
+from .services import create_traning_for_word, get_words_count_on_levels
 from .serializers import DictionarySerializer, DictionaryListSerializer
 from .pagination import VocabularyPageNumberPagination
 from apps.word.models import Dictionary, TrainingType
