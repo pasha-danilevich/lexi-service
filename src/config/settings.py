@@ -221,7 +221,7 @@ PAGE_SLICE_SIZE = 50
 # TRAINING
 
 TRAINING_TYPES = ['recognize', 'reproduce']
-
+TRAINING_TYPES_ID = {'recognize': 3, 'reproduce': 4}
 # CORS
 
 CORS_ALLOWED_ORIGINS = [

@@ -1,4 +1,4 @@
-from typing import Any, Type, Union, cast
+from typing import Any, cast
 from django.http import Http404
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
@@ -7,13 +7,12 @@ from rest_framework.permissions import IsAuthenticated
 from apps.api.v1.training.serializers import RecognizeListSerializer, ReproduceListSerializer
 from apps.user.models import User
 
-from .utils import get_time_on_lvl, is_last_level_or_out, is_first_level
-from apps.word.utils import get_current_unix_time
+from .utils import get_new_lvl, get_new_time
 
 from apps.word.models import Dictionary, Training
 
 
-from config.settings import TRAINING_TYPES
+from config.settings import TRAINING_TYPES, TRAINING_TYPES_ID
 
 
 class TrainingView(generics.GenericAPIView):
@@ -44,12 +43,16 @@ class TrainingView(generics.GenericAPIView):
 
         detail = f'type: {self.current_type} не подходи. Необходимо передать параметр type: {self.types}'
         raise Http404(detail)
-    
+
     def get_serializer_context(self):
         context = super().get_serializer_context()
         number_of_false_set = self.get_user().settings.number_of_false_set
-        
-        context.update({'number_of_false_set': number_of_false_set})
+
+        context.update({
+            'number_of_false_set': number_of_false_set,
+            'type_id': TRAINING_TYPES_ID[self.get_type()]
+        })
+
         return context
 
     def get_user(self):
@@ -58,22 +61,23 @@ class TrainingView(generics.GenericAPIView):
 
 class TrainingListUpdate(TrainingView, generics.ListAPIView, mixins.UpdateModelMixin):
 
-    def get_object(self):
-        data = self.request.POST.dict()
+    def get_training(self) -> Training:
+        data = self.request.data  # type: ignore
         pk = data['pk']
 
         try:
-            obj = Dictionary.objects.get(id=pk)
+            obj = Training.objects.get(id=pk)
+            return obj
         except:
             detail = f'Связь {pk} не найдена'
             raise Http404(detail)
 
-        return obj
-    
     def list(self, request, *args, **kwargs):
         user = self.get_user()
         self.current_type = self.get_type()
-        queryset = Dictionary.objects.all(user.pk)[:2]
+        type_id = TRAINING_TYPES_ID[self.current_type]
+
+        queryset = Dictionary.objects.all(user.pk).current(type_id=type_id)
 
         serializer = self.get_serializer(queryset, **kwargs, many=True)
 
@@ -83,38 +87,21 @@ class TrainingListUpdate(TrainingView, generics.ListAPIView, mixins.UpdateModelM
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     def patch(self, request, *args, **kwargs):
-        type = self.get_type()
-        instance = self.get_object()
+        training = self.get_training()
         user = self.get_user()
-
         levels = user.settings.levels
+        data = self.request.data  # type: ignore
 
-        is_correct = self.request.data['is_correct']  # type: ignore
+        new_lvl = get_new_lvl(
+            is_correct=data['is_correct'],
+            levels=levels,
+            current_lvl=training.lvl
+        )
 
-        type_lvl = type + '_lvl'
-        type_time = type + '_time'
+        training.lvl = new_lvl
+        training.time = get_new_time(levels, new_lvl)
 
-        current_lvl = getattr(instance, type_lvl)
-
-        if is_correct:
-            if not is_last_level_or_out(levels, current_lvl):
-                new_lvl = current_lvl + 1
-            else:
-                # остается на прежднем уровне (1й или последний)
-                new_lvl = current_lvl
-        else:
-            if not is_first_level(current_lvl):
-                new_lvl = current_lvl - 1
-            else:
-                # остается на прежднем уровне (1й или последний)
-                new_lvl = current_lvl
-
-        new_time = get_current_unix_time() + get_time_on_lvl(levels, new_lvl)
-
-        setattr(instance, type_lvl, new_lvl)
-        setattr(instance, type_time, new_time)
-
-        instance.save(is_instance=True)
+        training.save()
 
         return Response(status=status.HTTP_200_OK)
 
