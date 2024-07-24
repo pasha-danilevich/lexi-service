@@ -28,8 +28,10 @@ class Vocabulary(generics.GenericAPIView):
         return self.serializer_class
     
     def get_queryset(self):
-        queryset = self.queryset.filter(user_id=self.request.user.pk)
-        return queryset
+        user = cast(User, self.request.user)
+        user_id: int = user.pk
+
+        return self.queryset.all(user_id=user_id)
 
 
 class VocabularyListCreate(generics.ListCreateAPIView, Vocabulary):
@@ -61,7 +63,13 @@ class VocabularyListCreate(generics.ListCreateAPIView, Vocabulary):
         return super().list(request, *args, **kwargs)
     
 class VocabularyDelete(generics.DestroyAPIView, Vocabulary):
-    lookup_field = 'pk'
+    
+    def get_object(self):
+        data = self.request.data # type: ignore
+        instance = self.get_queryset().get(**data)
+        return instance
+
+
     
     
 
