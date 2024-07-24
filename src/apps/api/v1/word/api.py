@@ -12,6 +12,13 @@ class WordGeneric(generics.GenericAPIView):
     queryset = Word.objects.all()
     serializer_class = WordSerializer
     
+    def update_data_with_word(self, data: dict, word: Word) -> dict:
+        serializer = self.serializer_class(word)
+        return {**data, "word": serializer.data}
+    
+    def update_data_with_related_pk(self, data: dict, new_data: list[int]):
+        return {**data, 'related_pk': new_data}
+    
 class WordCreate(WordGeneric, mixins.CreateModelMixin):
 
     def post(self, request, *args, **kwargs):
@@ -30,28 +37,38 @@ class WordCreate(WordGeneric, mixins.CreateModelMixin):
         if not word:
             return Response(data='Объект не найден и нет данных о слове', status=status.HTTP_404_NOT_FOUND)
         
-        serializer = WordSerializer(word)
-        response = {"word": serializer.data}
+        data = {}
+        data = self.update_data_with_word(data, word)
+        
         if created:
-            response = {**response, 'related_pk': []}
-            return Response(response, status=status.HTTP_201_CREATED)
+            data = self.update_data_with_related_pk(data, new_data=[])
+            return Response(data, status=status.HTTP_201_CREATED)
         
         if user.is_authenticated:
-            response = {**response, 'related_pk': get_related_pk(word=word, user=user)}
+            related_pk = get_related_pk(word=word, user=user)
+            data = self.update_data_with_related_pk(data, new_data=related_pk)
 
-        return Response(response, status=status.HTTP_200_OK)
+
+        return Response(data, status=status.HTTP_200_OK)
     
     
 class WordGet(WordGeneric):
 
-    def get(self, request, pk):
+    def get(self, request, pk): 
         try:
             word = Word.objects.get(id=pk)
         except Word.DoesNotExist:
             return Response(data='Объект не найден и нет данных о слове либо был удален.', status=status.HTTP_404_NOT_FOUND)
         
-        serializer = WordSerializer(word)
-        data = serializer.data
+        user = cast(User, self.request.user)
+        
+        
+        data = {}
+        data = self.update_data_with_word(data, word)
+        
+        if user.is_authenticated:
+            related_pk = get_related_pk(word=word, user=user)
+            data = self.update_data_with_related_pk(data, new_data=related_pk)
         
         return Response(data, status=status.HTTP_200_OK)
 
