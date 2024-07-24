@@ -63,7 +63,7 @@ class BookRetrieve(generics.RetrieveAPIView, GenericBook):
         
         return Response(serializer.data)
 
-class BookmarkListCreate(generics.ListCreateAPIView, mixins.DestroyModelMixin):
+class BookmarkListCreate(generics.ListCreateAPIView):
 
     serializer_class = BookmarkListSerializer
     permission_classes = [IsAuthenticated]
@@ -77,20 +77,22 @@ class BookmarkListCreate(generics.ListCreateAPIView, mixins.DestroyModelMixin):
         book = Book.objects.get(id=request.data['book_id'])
         target_page = request.data['target_page']
 
-        _, is_created = UserBook.objects.update_or_create(
+        bookmark, is_created = UserBook.objects.update_or_create(
             user=user,
             book=book,
             defaults={
                 'target_page': target_page
             }
         )
+        data = {"pk": bookmark.pk}
+        
         if is_created:
-            return Response(status=status.HTTP_201_CREATED)
+            return Response(data=data, status=status.HTTP_201_CREATED)
 
-        return Response(status=status.HTTP_200_OK)
+        return Response(data=data, status=status.HTTP_200_OK)
 
 
-class BookmarkDestroy(generics.DestroyAPIView):
+class BookmarkDeleteView(generics.DestroyAPIView):
     queryset = UserBook.objects.all()
-    serializer_class = BookmarkRetrieveCreateSerializer
     permission_classes = [IsAuthenticated]
+    lookup_field = "pk"
