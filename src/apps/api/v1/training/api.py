@@ -4,6 +4,7 @@ from rest_framework import generics, mixins, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
+from .permissions import IsOwnerOrReadOnly
 from apps.api.v1.training.serializers import RecognizeListSerializer, ReproduceListSerializer
 from apps.user.models import User
 
@@ -17,7 +18,7 @@ from config.settings import TRAINING_TYPES, TRAINING_TYPES_ID
 
 class TrainingView(generics.GenericAPIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
     pagination_class = None
 
     def __init__(self, **kwargs: Any) -> None:
@@ -66,21 +67,26 @@ class TrainingListUpdate(TrainingView, generics.ListAPIView, mixins.UpdateModelM
         pk = data['pk']
 
         try:
-            obj = Training.objects.get(id=pk)
+            obj = Training.objects.select_related(
+                'dictionary'
+            ).get(id=pk)
+
+            self.check_object_permissions(self.request, obj)
             return obj
-        except:
-            detail = f'Связь {pk} не найдена'
-            raise Http404(detail)
+        except Training.DoesNotExist:
+            details = f'Связь {pk} не найдена'
+            raise Http404(details)
 
     def list(self, request, *args, **kwargs):
         user = self.get_user()
         self.current_type = self.get_type()
         type_id = TRAINING_TYPES_ID[self.current_type]
         count_word_in_round = user.settings.count_word_in_round
-        
+
         queryset = Dictionary.objects.all(user.pk)
-        user_dictionary = queryset.current(type_id=type_id)[:count_word_in_round]
-        
+        user_dictionary = queryset.current(type_id=type_id)[
+            :count_word_in_round]
+
         serializer = self.get_serializer(user_dictionary, **kwargs, many=True)
 
         if serializer.data:
@@ -115,7 +121,8 @@ class TrainingInfo(TrainingView):
         queryset = Dictionary.objects.all(user_id=user.pk)
 
         for type in self.types:
-            word_to_training = queryset.current(type_id=TRAINING_TYPES_ID[type])
+            word_to_training = queryset.current(
+                type_id=TRAINING_TYPES_ID[type])
 
             data.update(
                 {f'count_word_to_training_{type}': word_to_training.count()}
