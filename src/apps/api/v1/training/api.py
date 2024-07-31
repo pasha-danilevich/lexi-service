@@ -67,9 +67,7 @@ class TrainingListUpdate(TrainingView, generics.ListAPIView, mixins.UpdateModelM
         pk = data['pk']
 
         try:
-            obj = Training.objects.select_related(
-                'dictionary'
-            ).get(id=pk)
+            obj = Training.objects.get(id=pk)
 
             self.check_object_permissions(self.request, obj)
             return obj
