@@ -1,6 +1,7 @@
 from typing import cast
 from django.db import transaction
 
+from django.http import Http404
 from rest_framework import generics,  status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -15,7 +16,7 @@ from apps.word.models import Dictionary, TrainingType
 from config.settings import TRAINING_TYPES
 
 class Vocabulary(generics.GenericAPIView):
-    queryset = Dictionary.objects.all(None).order_by('-id').prefetch_related('training')
+    queryset = Dictionary.objects.all(None).order_by('-id')
     serializer_class = DictionarySerializer
     permission_classes = (IsAuthenticated, )
     pagination_class = VocabularyPageNumberPagination
@@ -66,7 +67,11 @@ class VocabularyDelete(generics.DestroyAPIView, Vocabulary):
     
     def get_object(self):
         data = self.request.data # type: ignore
-        instance = self.get_queryset().get(**data)
+        try:
+            instance = self.get_queryset().get(**data)
+        except Dictionary.DoesNotExist:
+            details = f'Связь {data} не найдена'
+            raise Http404(details)
         return instance
 
 
