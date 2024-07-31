@@ -1,6 +1,6 @@
 from typing import Dict, Optional, overload
 from django.http import HttpRequest
-from apps.book.models import Book, UserBook
+from apps.book.models import Book, Bookmark
 from apps.user.models import User
 from config.settings import PAGE_SLICE_SIZE
 from django.contrib.auth.models import AnonymousUser
@@ -65,17 +65,17 @@ def get_user_bookmark(obj, user):
         user (User): Объект пользователя.
         
     Возвращает:
-        dict[str, int]: Словарь с полями pk и target_page, если пользователь не анонимный и объект UserBook найден.
-        None: Если пользователь анонимный или объект UserBook не найден.
+        dict[str, int]: Словарь с полями pk и target_page, если пользователь не анонимный и объект Bookmark найден.
+        None: Если пользователь анонимный или объект Bookmark не найден.
     """
     if user.is_anonymous:
         return None
     
     try:
-        user_book = UserBook.objects.get(book=obj, user=user)
+        user_book = Bookmark.objects.get(book=obj, user=user)
         return {
             'pk': user_book.pk,
             'target_page': user_book.target_page
         }
-    except UserBook.DoesNotExist:
+    except Bookmark.DoesNotExist:
         return None

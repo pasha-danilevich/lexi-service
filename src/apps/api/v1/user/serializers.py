@@ -6,9 +6,7 @@ from rest_framework.settings import api_settings
 
 from djoser.serializers import UidAndTokenSerializer, UserCreateMixin, UserCreatePasswordRetypeSerializer
 
-from apps.book.models import UserBook
 from apps.user.models import User, Settings
-from apps.word.models import Dictionary
 
 
 User = get_user_model()

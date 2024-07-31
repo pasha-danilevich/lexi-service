@@ -32,7 +32,7 @@ class Book(models.Model):
         
         return reverse("books-retrieve", kwargs={"pk": self.pk})
 
-class UserBook(models.Model):
+class Bookmark(models.Model):
     user = models.ForeignKey(
         "user.User", related_name='related_books', on_delete=models.CASCADE)
     book = models.ForeignKey(

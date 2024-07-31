@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from apps.api.v1.book.permissions import IsOwnerOrReadOnly
 from apps.api.v1.book.services import get_user_bookmark
-from apps.book.models import Book, UserBook
+from apps.book.models import Book, Bookmark
 from apps.book.utils import json_to_book
 from apps.user.models import User
 
@@ -71,7 +71,7 @@ class BookmarkListCreate(generics.ListCreateAPIView):
     pagination_class = BookmarkPageNumberPagination
 
     def get_queryset(self):
-        return UserBook.objects.filter(user_id=self.request.user.pk).order_by('-id')
+        return Bookmark.objects.filter(user_id=self.request.user.pk).order_by('-id')
 
     def post(self, request, *args, **kwargs):
         user = request.user
@@ -84,7 +84,7 @@ class BookmarkListCreate(generics.ListCreateAPIView):
         
         target_page = request.data['target_page']
 
-        bookmark, is_created = UserBook.objects.update_or_create(
+        bookmark, is_created = Bookmark.objects.update_or_create(
             user=user,
             book=book,
             defaults={
@@ -100,6 +100,6 @@ class BookmarkListCreate(generics.ListCreateAPIView):
 
 
 class BookmarkDeleteView(generics.DestroyAPIView):
-    queryset = UserBook.objects.all()
+    queryset = Bookmark.objects.all()
     permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
     lookup_field = "pk"

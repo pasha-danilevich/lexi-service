@@ -1,7 +1,7 @@
 from typing import cast
 from rest_framework import serializers
 from apps.api.v1.book.services import get_start_end, get_user_bookmark
-from apps.book.models import Book, UserBook
+from apps.book.models import Book, Bookmark
 from apps.book.utils import json_to_book
 from apps.user.models import User
 from config.settings import PAGE_SLICE_SIZE
@@ -67,7 +67,7 @@ class BookRetrieveSerializer(serializers.ModelSerializer):
     
 class BookmarkRetrieveCreateSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserBook
+        model = Bookmark
         fields = [
             'pk',
             'book'
@@ -83,7 +83,7 @@ class BookmarkListSerializer(serializers.ModelSerializer):
     book_cover = serializers.SerializerMethodField()
 
     class Meta:
-        model = UserBook
+        model = Bookmark
         fields = ['pk', 'book_cover', 'target_page']
         extra_kwargs = {'book_cover': {'read_only': True}}
 
