@@ -6,6 +6,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import generics, mixins, status
 from rest_framework.permissions import IsAuthenticated
 
+from apps.api.v1.book.permissions import IsOwnerOrReadOnly
 from apps.api.v1.book.services import get_user_bookmark
 from apps.book.models import Book, UserBook
 from apps.book.utils import json_to_book
@@ -74,7 +75,13 @@ class BookmarkListCreate(generics.ListCreateAPIView):
 
     def post(self, request, *args, **kwargs):
         user = request.user
-        book = Book.objects.get(id=request.data['book_id'])
+        
+        try:
+            book = Book.objects.get(id=request.data['book_id'])
+        except Book.DoesNotExist:
+            data = {'details': 'Книга не найдена'}
+            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+        
         target_page = request.data['target_page']
 
         bookmark, is_created = UserBook.objects.update_or_create(
@@ -94,5 +101,5 @@ class BookmarkListCreate(generics.ListCreateAPIView):
 
 class BookmarkDeleteView(generics.DestroyAPIView):
     queryset = UserBook.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
     lookup_field = "pk"
