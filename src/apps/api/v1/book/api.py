@@ -22,7 +22,6 @@ class GenericBook(generics.GenericAPIView):
 class BookListCreate(generics.ListCreateAPIView, GenericBook):
     serializer_class = BookListCreateSerializer
     pagination_class = BookListPageNumberPagination
-    permission_classes = [IsAuthenticatedOrReadOnly]
     
     def post(self, request, *args, **kwargs):    
         book = request.data.get('book')
@@ -41,6 +40,14 @@ class BookListCreate(generics.ListCreateAPIView, GenericBook):
         except IntegrityError:  
             data = {'details': 'Книга с таким название и автором уже существует'}  
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+class OwnBookList(generics.ListAPIView, GenericBook):
+    serializer_class = BookListCreateSerializer
+    
+    def get_queryset(self):
+        user_id = self.request.user.pk
+        return self.queryset.filter(author_upload_id=user_id)
+    
     
 class BookRetrieve(generics.RetrieveAPIView, GenericBook):
     serializer_class = BookRetrieveSerializer
