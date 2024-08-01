@@ -13,5 +13,8 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
             return True
 
         # Разрешение на запись разрешено только владельцу объекта.
-        print(obj, request.user)
-        return obj.user == request.user
+        
+        try:
+            return obj.user == request.user
+        except AttributeError:
+            return obj.author_upload == request.user
