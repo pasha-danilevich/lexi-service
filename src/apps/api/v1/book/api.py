@@ -43,6 +43,7 @@ class BookListCreate(generics.ListCreateAPIView, GenericBook):
 
 class OwnBookList(generics.ListAPIView, GenericBook):
     serializer_class = BookListCreateSerializer
+    pagination_class = BookListPageNumberPagination
     
     def get_queryset(self):
         user_id = self.request.user.pk
