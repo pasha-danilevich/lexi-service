@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'apps.user',
     'apps.book',
     'apps.word',
+    'apps.custom_email',
     
     'rest_framework',
     'corsheaders',
@@ -189,8 +190,11 @@ DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
     
     # EMAIL
+    'EMAIL': {
+        'activation': 'apps.custom_email.email.CustomActivationEmail',
+    },
     'SEND_ACTIVATION_EMAIL': True,
-    'ACTIVATION_URL': 'api/users/activation/{uid}/{token}', # так будет выглядить url в писме на почту
+    'ACTIVATION_URL': 'activation/{uid}/{token}', # так будет выглядить url в писме на почту
     
     'TOKEN_MODEL': None, # we use only JWT 
     'SERIALIZERS': {
@@ -223,10 +227,9 @@ PAGE_SLICE_SIZE = 50
 TRAINING_TYPES = ['recognize', 'reproduce']
 TRAINING_TYPES_ID = {'recognize': 3, 'reproduce': 4}
 # CORS
-
+DOMAIN = 'localhost:5173'
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3080",
-    "http://localhost:5173",
+    f"http://{DOMAIN}",
 ]
 
 

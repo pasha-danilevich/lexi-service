@@ -8,7 +8,7 @@ urlpatterns = [
     path('set_email/',
          UserActivate.as_view({"post": "set_email"}), name="set_email"),
     path("activation/<str:uid>/<str:token>/",
-         UserActivate.as_view({"post": "activation"}), name="activate"),
+         UserActivate.as_view({"get": "activation"}), name="activate"),
     path("resend_activation/",
          UserActivate.as_view({"post": "resend_activation"}), name="resend_activation"),
     path("set_password/", 
