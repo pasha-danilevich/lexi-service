@@ -176,7 +176,6 @@ SIMPLE_JWT = {
 }
 
 
-
 DJOSER = {
     # PASSWORD_RESET
     'USER_CREATE_PASSWORD_RETYPE': True,
@@ -187,7 +186,7 @@ DJOSER = {
     # вернет неверный ответ на запрос HTTP 400, если адрес электронной почты, 
     # указанный для запроса на сброс пароля, не существует в базе данных
     'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
-    'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
+    'PASSWORD_RESET_CONFIRM_URL': 'forgot-password/{uid}/{token}',
     
     # EMAIL
     'EMAIL': {
