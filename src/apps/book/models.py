@@ -7,8 +7,8 @@ def book_default():
     return None
 
 class Book(models.Model):
-    title = models.CharField('title', max_length=255, blank=False)
-    author = models.CharField('author', max_length=255, blank=True)
+    title = models.CharField('title', max_length=50, blank=False)
+    author = models.CharField('author', max_length=50, blank=True)
     page_count = models.IntegerField('page_count', blank=False)
     slug = models.SlugField('slug', null=False, blank=False, unique=True)
     author_upload = models.ForeignKey(
