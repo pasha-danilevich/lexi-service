@@ -29,7 +29,7 @@ class BookListCreate(generics.ListCreateAPIView, GenericBook):
         book = request.data.get('book')
 
         if not book or len(book) == 0:
-            data = {'book': 'Это поле не может быть пустым'}
+            data = {'book': ['Это поле не может быть пустым']}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
         book = json_to_book(request.data['book'])
