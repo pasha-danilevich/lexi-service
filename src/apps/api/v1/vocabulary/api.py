@@ -11,7 +11,7 @@ from apps.user.models import User
 from .services import create_traning_for_word, get_words_count_on_levels
 from .serializers import DictionarySerializer, DictionaryListSerializer
 from .pagination import VocabularyPageNumberPagination
-from apps.word.models import Dictionary, TrainingType
+from apps.word.models import Dictionary
 
 from config.settings import TRAINING_TYPES
 
@@ -97,7 +97,7 @@ class VocabularyStats(generics.ListAPIView, Vocabulary):
     def list(self, *args, **kwargs):
         user = cast(User, self.request.user)
         levels_length = len(user.settings.levels)
-        type_queryset = TrainingType.objects.all()
+        type_queryset = []
         dictionary = self.get_queryset()
         
         data = {type.name: self.get_value(type.pk, dictionary, levels_length) for type in type_queryset}

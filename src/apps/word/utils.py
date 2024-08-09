@@ -9,3 +9,8 @@ def get_current_unix_time() -> int:
     """
     return round(time.time())
     
+def get_key_by_value(training_types, value_to_find):
+    for key, value in training_types.items():
+        if value == value_to_find:
+            return key
+    return None

@@ -4,8 +4,8 @@ from django.db import models
 
 from apps.word.managers import DictionaryCustomManager, DictionaryQuerySet
 
-from .utils import get_current_unix_time
-from config.settings import TRAINING_TYPES
+from .utils import get_current_unix_time, get_key_by_value
+from config.settings import TRAINING_TYPES, TRAINING_TYPES_ID
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -23,7 +23,7 @@ class Word(models.Model):
     synonyms: 'Synonym'
     meanings: 'Meaning'
     dictionary: 'DictionaryQuerySet'
-    
+
     def __str__(self):
         return self.text
 
@@ -71,15 +71,13 @@ class Dictionary(models.Model):
     word = models.ForeignKey("word.Word", related_name='dictionary',
                              on_delete=models.CASCADE, blank=False, null=False)
     translation = cast(Translation, models.ForeignKey("word.Translation", related_name='users',
-                                    on_delete=models.CASCADE, blank=False, null=False))
+                                                      on_delete=models.CASCADE, blank=False, null=False))
 
     date_added = models.DateTimeField(auto_now_add=True)
-    
+
     training: "Training"
-    
+
     objects: DictionaryCustomManager = DictionaryCustomManager()
-    
-    
 
     class Meta:
         unique_together = ('user', 'word', 'translation',)
@@ -92,24 +90,10 @@ class Training(models.Model):
     dictionary = models.ForeignKey("word.Dictionary", related_name='training',
                                    on_delete=models.CASCADE, blank=False, null=False)
 
-    type = models.ForeignKey("word.TrainingType", related_name='training',
-                             on_delete=models.DO_NOTHING, blank=False, null=False)
+    type_id = models.IntegerField(null=True, blank=True)
 
     lvl = models.IntegerField("lvl", default=1, null=False)
     time = models.IntegerField("time", null=False)
 
-
     def __str__(self) -> str:
-        return f"To {self.dictionary} add training {self.type}"
-
-
-class TrainingType(models.Model):
-    name = models.CharField(max_length=20)
-
-    def __str__(self) -> str:
-        return f"Training type: {self.name}"
-
-
-
-
-
+        return f"To {self.dictionary} training. Type: {get_key_by_value(TRAINING_TYPES_ID, self.type_id)}"

@@ -2,16 +2,19 @@ from datetime import timedelta
 from pathlib import Path
 from . import local_settings as local
 
+
 def p(text, green=True):
     if green:
         print(f"\033[32m{text}\033[0m")
     else:
         print(f'\033[31m{text}\033[0m')
 
+
 def print_local_var(locals):
     for var, value in locals.items():
-        print(f'{var} = {value}') 
+        print(f'{var} = {value}')
     print('-----------------------------')
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -32,14 +35,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     'apps.api',
-    
+
     'apps.user',
     'apps.book',
     'apps.word',
     'apps.custom_email',
-    
+
     'rest_framework',
     'corsheaders',
     'djoser',
@@ -131,23 +134,20 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR.joinpath("static/")
 
 
-
-
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# AUTH 
+# AUTH
 
 AUTH_USER_MODEL = 'user.User'
 AUTHENTICATION_BACKENDS = ('apps.user.backends.EmailOrUsernameModelBackend',)
- 
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication'
     ],
-    
+
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 2
 }
@@ -157,8 +157,8 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=7),
     # после этого времени пароль обязателен
     "REFRESH_TOKEN_LIFETIME": timedelta(days=60),
-    # при запросе на обновление токена, ЕСЛИ False, будет 
-    # возвращен только новый access-токен 
+    # при запросе на обновление токена, ЕСЛИ False, будет
+    # возвращен только новый access-токен
     "ROTATE_REFRESH_TOKENS": True,
     # будет ли refresh-токен добавлен в черный список после его обновления
     "BLACKLIST_AFTER_ROTATION": False,
@@ -169,7 +169,7 @@ SIMPLE_JWT = {
     "TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",
     "TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSerializer",
     "TOKEN_VERIFY_SERIALIZER": "rest_framework_simplejwt.serializers.TokenVerifySerializer",
-    
+
     "TOKEN_BLACKLIST_SERIALIZER": "rest_framework_simplejwt.serializers.TokenBlacklistSerializer",
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
@@ -181,25 +181,26 @@ DJOSER = {
     'USER_CREATE_PASSWORD_RETYPE': True,
     'SET_PASSWORD_RETYPE': True,
     'PASSWORD_RESET_CONFIRM_RETYPE': True,
-    
-    
-    # вернет неверный ответ на запрос HTTP 400, если адрес электронной почты, 
+
+
+    # вернет неверный ответ на запрос HTTP 400, если адрес электронной почты,
     # указанный для запроса на сброс пароля, не существует в базе данных
     'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
     'PASSWORD_RESET_CONFIRM_URL': 'forgot-password/{uid}/{token}',
-    
+
     # EMAIL
     'EMAIL': {
         'activation': 'apps.custom_email.email.CustomActivationEmail',
     },
     'SEND_ACTIVATION_EMAIL': True,
-    'ACTIVATION_URL': 'activation/{uid}/{token}', # так будет выглядить url в писме на почту
-    
-    'TOKEN_MODEL': None, # we use only JWT 
+    # так будет выглядить url в писме на почту
+    'ACTIVATION_URL': 'activation/{uid}/{token}',
+
+    'TOKEN_MODEL': None,  # we use only JWT
     'SERIALIZERS': {
         'activation':  f'apps.api.{API_VERSION}.user.serializers.CustomActivationSerializer',
         'user_create_password_retype': f'apps.api.{API_VERSION}.user.serializers.CustomUserCreatePasswordRetypeSerializer',
-        },
+    },
 }
 
 # EMAIL
@@ -223,8 +224,16 @@ PAGE_SLICE_SIZE = 50
 
 # TRAINING
 
-TRAINING_TYPES = ['recognize', 'reproduce']
-TRAINING_TYPES_ID = {'recognize': 3, 'reproduce': 4}
+TRAINING_TYPES = ['recognize', 'reproduce'] # + ['puzzel', 'sprint', 'audio']
+
+TRAINING_TYPES_ID = {
+    'recognize': 1,
+    'reproduce': 2,
+    # 'puzzel': 3,
+    # 'sprint': 4,
+    # 'audio': 5
+}
+
 # CORS
 DOMAIN = 'localhost:5173'
 CORS_ALLOWED_ORIGINS = [

@@ -117,7 +117,7 @@ class TrainingInfo(TrainingView):
         user = self.request.user
         data = {}
         queryset = Dictionary.objects.all(user_id=user.pk)
-
+        print(queryset)
         for type in self.types:
             word_to_training = queryset.current(
                 type_id=TRAINING_TYPES_ID[type])

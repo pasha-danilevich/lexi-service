@@ -21,7 +21,7 @@ class DictionarySerializer(serializers.ModelSerializer):
 class TrainingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Training
-        fields = ['type', 'lvl', 'time']
+        fields = ['type_id', 'lvl', 'time']
 
 class DictionaryListSerializer(serializers.ModelSerializer):
     training = TrainingSerializer(many=True, read_only=True)
