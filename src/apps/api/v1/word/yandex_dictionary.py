@@ -31,7 +31,8 @@ def fetch_word_data(word: str):
         'lang': 'en-ru',
         'text': word,
         'ui': 'ru',
-        'flags': 2
+        'flags': 6 # Используется SHORT_POS (0x0002) + MORPHO (0x0004)
+        # MORPHO (0x0004) избавляет от проблемы ненахода слов. Это означает, что API будет искать не только точное совпадение с указанным словом, но и его словоформы (например, склонения, спряжения и т.д.)
     }
 
     response, execution_time = get_response(url, params=params)

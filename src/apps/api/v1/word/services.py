@@ -1,4 +1,4 @@
-from django.db import transaction
+from django.db import IntegrityError, transaction
 import re
 
 from apps.api.v1.word.yandex_dictionary import fetch_word_data
@@ -52,7 +52,7 @@ def get_or_create_word(request_word: str) -> tuple[Word | None, bool]:
         return None, False
     
     try:
-        word = Word.objects.get(text__exact=request_word)
+        word = Word.objects.get(text=request_word)
         created = False
         return word, created
     
@@ -71,8 +71,16 @@ def get_or_create_word(request_word: str) -> tuple[Word | None, bool]:
                 word_bulk_create(Synonym, word_set['synonym'], word)
                 word_bulk_create(Meaning, word_set['meaning'], word)
                 
+        except IntegrityError: # Если возникла ошибка уникальности, пытаемся получить существующее слово
+            print(word_set['word']['text'])
+            
+            existing_word = Word.objects.get(text=word_set['word']['text'])
+            created = False
+            
+            return existing_word, created  
+        
         except Exception as e:
-            raise e
+            raise e  
         
 
         return word, created
