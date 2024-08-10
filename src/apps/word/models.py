@@ -12,16 +12,35 @@ from django.dispatch import receiver
 from django.core.exceptions import ObjectDoesNotExist
 
 
+class PartOfSpeech(models.Model):
+    text = models.CharField(max_length=20, null=False, blank=False)
+
+    words: 'Word | models.QuerySet[Word]'
+    synonyms: 'Synonym | models.QuerySet[Synonym]'
+    translations: 'Translation | models.QuerySet[Translation]'
+
+    def __str__(self) -> str:
+        return f"Part of speech {self.text}"
+
+
 class Word(models.Model):
     text = models.CharField(max_length=100, unique=True)
-    part_of_speech = models.CharField(
-        max_length=100, null=True, blank=True)  # Часть речи
-    transcription = models.CharField(
-        max_length=100, null=True, blank=True)  # Транскрипция
 
-    translations: 'Translation'
-    synonyms: 'Synonym'
-    meanings: 'Meaning'
+    part_of_speech: PartOfSpeech = cast(
+        PartOfSpeech, models.ForeignKey(
+            'word.PartOfSpeech',
+            related_name='words',
+            on_delete=models.DO_NOTHING,
+            blank=False,
+            null=True,
+            default=None)
+    )
+
+    transcription = models.CharField(max_length=100, null=True, blank=True)
+
+    translations: 'Translation | models.QuerySet[Translation]'
+    synonyms: 'Synonym | models.QuerySet[Synonym]'
+    meanings: 'Meaning | models.QuerySet[Meaning]'
     dictionary: 'DictionaryQuerySet'
 
     def __str__(self):
@@ -30,13 +49,33 @@ class Word(models.Model):
 
 class Translation(models.Model):
     word = models.ForeignKey(
-        Word, on_delete=models.CASCADE, related_name='translations')
+        Word, 
+        on_delete=models.CASCADE, 
+        related_name='translations'
+    )
+    
     text = models.CharField(max_length=100)
-    part_of_speech = models.CharField(
-        max_length=100, null=True, blank=True)  # Часть речи
-    gender = models.CharField(max_length=10, null=True, blank=True)  # Род
+    
+    part_of_speech: PartOfSpeech = cast(
+        PartOfSpeech, models.ForeignKey(
+            'word.PartOfSpeech',
+            related_name='translations',
+            on_delete=models.DO_NOTHING,
+            blank=False,
+            null=True,
+            default=None)
+    )
+
+    gender = models.CharField(
+        max_length=10, 
+        null=True, 
+        blank=True
+    )
+    
     frequency = models.IntegerField(
-        null=True, blank=True)  # Частота использования
+        null=True, 
+        blank=True
+    )  # Частота использования
 
     def __str__(self):
         return self.text
@@ -44,13 +83,33 @@ class Translation(models.Model):
 
 class Synonym(models.Model):
     word = models.ForeignKey(
-        Word, on_delete=models.CASCADE, related_name='synonyms')
+        Word,
+        on_delete=models.CASCADE,
+        related_name='synonyms'
+    )
+
     text = models.CharField(max_length=100)
-    part_of_speech = models.CharField(
-        max_length=100, null=True, blank=True)  # Часть речи
-    gender = models.CharField(max_length=10, null=True, blank=True)  # Род
+
+    part_of_speech: PartOfSpeech = cast(
+        PartOfSpeech, models.ForeignKey(
+            'word.PartOfSpeech',
+            related_name='synonyms',
+            on_delete=models.DO_NOTHING,
+            blank=False,
+            null=True,
+            default=None)
+    )
+
+    gender = models.CharField(
+        max_length=10,
+        null=True,
+        blank=True
+    )
+
     frequency = models.IntegerField(
-        null=True, blank=True)  # Частота использования
+        null=True,
+        blank=True
+    )  # Частота использования
 
     def __str__(self):
         return self.text
@@ -58,7 +117,11 @@ class Synonym(models.Model):
 
 class Meaning(models.Model):
     word = models.ForeignKey(
-        Word, on_delete=models.CASCADE, related_name='meanings')
+        Word,
+        on_delete=models.CASCADE,
+        related_name='meanings'
+    )
+
     text = models.CharField(max_length=100)
 
     def __str__(self):
@@ -66,12 +129,29 @@ class Meaning(models.Model):
 
 
 class Dictionary(models.Model):
-    user = models.ForeignKey("user.User", related_name='words',
-                             on_delete=models.CASCADE, blank=False, null=False)
-    word = models.ForeignKey("word.Word", related_name='dictionary',
-                             on_delete=models.CASCADE, blank=False, null=False)
-    translation = cast(Translation, models.ForeignKey("word.Translation", related_name='users',
-                                                      on_delete=models.CASCADE, blank=False, null=False))
+    user = models.ForeignKey(
+        "user.User",
+        related_name='words',
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False
+    )
+
+    word = models.ForeignKey(
+        "word.Word",
+        related_name='dictionary',
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False
+    )
+
+    translation = cast(Translation, models.ForeignKey(
+        "word.Translation",
+        related_name='users',
+        on_delete=models.CASCADE,
+        blank=False,
+        null=False
+    ))
 
     date_added = models.DateTimeField(auto_now_add=True)
 
@@ -87,8 +167,13 @@ class Dictionary(models.Model):
 
 
 class Training(models.Model):
-    dictionary = models.ForeignKey("word.Dictionary", related_name='training',
-                                   on_delete=models.CASCADE, blank=False, null=False)
+    dictionary = models.ForeignKey(
+        "word.Dictionary", 
+        related_name='training',
+        on_delete=models.CASCADE, 
+        blank=False, 
+        null=False
+    )
 
     type_id = models.IntegerField(null=True, blank=True)
 

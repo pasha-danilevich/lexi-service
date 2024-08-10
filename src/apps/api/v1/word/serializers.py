@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from apps.word.models import Word, Translation, Synonym, Meaning
-
+# list_to_delete = Word.objects.filter(part_of_speech=["местоимение", "предикатив", "местоимение", "существительное", "предлог", "неизменяемое", "причастие", "частица", "наречие", "глагол"])
 class TranslationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Translation

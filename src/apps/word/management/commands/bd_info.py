@@ -1,3 +1,4 @@
+from typing import Iterable, cast
 import django
 from django.core.management.base import BaseCommand
 from django.apps import AppConfig, apps
@@ -13,12 +14,12 @@ class Command(BaseCommand):
         parser.add_argument('--app_name', type=str)
 
     def handle(self, *args, **options):
-        app_name: str = options.get('app_name')
+        app_name = options.get('app_name')
         
         if app_name:
-            app_configs = apps.get_app_config(app_name)
+            app_configs: Iterable[AppConfig] = cast(Iterable[AppConfig], apps.get_app_config(app_name)) 
         else:
-            app_configs = apps.get_app_configs()
+            app_configs: Iterable[AppConfig] = apps.get_app_configs()
             app_configs = [
                 app_config
                 for app_config in app_configs
