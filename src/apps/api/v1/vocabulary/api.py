@@ -2,20 +2,21 @@ from typing import cast
 from django.db import transaction
 
 from django.http import Http404
-from django.db.models import Subquery, OuterRef
+from django.db.models import Subquery, OuterRef, QuerySet
 
 from rest_framework import generics,  status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from apps.user.models import User
+from apps.word.managers import DictionaryQuerySet
 
 from .services import create_traning_for_word, get_words_count_on_levels
 from .serializers import DictionarySerializer, DictionaryListSerializer
 from .pagination import VocabularyPageNumberPagination
-from apps.word.models import Dictionary
+from apps.word.models import Dictionary, Training
 
-from config.settings import TRAINING_TYPES
+from config.settings import TRAINING_TYPES, TRAINING_TYPES_ID
 
 
 class Vocabulary(generics.GenericAPIView):
@@ -108,25 +109,35 @@ class VocabularyDelete(generics.DestroyAPIView, Vocabulary):
 
 class VocabularyStats(generics.ListAPIView, Vocabulary):
 
-    def get_value(self, type, dictionary, levels_length):
+    def get_value(
+        self, 
+        type_id: int, 
+        dictionary: DictionaryQuerySet, 
+        levels_length: int
+    ):
         training_list = []
 
         for word in dictionary:
-            training_list.extend(word.training.filter(type=type))
+            word: Dictionary
+            word_trainig = cast(QuerySet[Training], word.training)
+            
+            training_list.extend(word_trainig.filter(type_id=type_id))
 
         value = get_words_count_on_levels(
             levels_length=levels_length,
             training_list=training_list
         )
+        
         return value
 
     def list(self, *args, **kwargs):
         user = cast(User, self.request.user)
         levels_length = len(user.settings.levels)
-        type_queryset = []
         dictionary = self.get_queryset()
 
-        data = {type.name: self.get_value(
-            type.pk, dictionary, levels_length) for type in type_queryset}
+        data = {
+            type_name: self.get_value(type_id, dictionary, levels_length) 
+            for type_name, type_id in TRAINING_TYPES_ID.items()
+        }
 
         return Response(data, status=status.HTTP_200_OK)
