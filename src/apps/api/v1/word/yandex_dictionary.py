@@ -1,6 +1,7 @@
 import requests
 from rest_framework.response import Response
 from rest_framework import status
+from apps.word.models import PartOfSpeech
 from config.local_settings import Y_KEY
 
 
@@ -36,7 +37,6 @@ def fetch_word_data(word: str):
     }
 
     response, execution_time = get_response(url, params=params)
-    
     
     
     if not response.status_code == 200: # type: ignore
@@ -83,7 +83,7 @@ def extract_word(json: dict) -> dict:
 
     obj = {
         "text": word.get('text'),
-        "part_of_speech": word.get('pos'),
+        "part_of_speech": _set_part_of_speech(word.get('pos')),
         "transcription": word.get('ts'),
         "form": word.get('fl'),
     }
@@ -104,7 +104,7 @@ def extract_translation(json: dict) -> list | None:
 
             obj = {
                 "text": translation.get('text'),
-                "part_of_speech": translation.get('pos'),
+                "part_of_speech": _set_part_of_speech(translation.get('pos')),
                 "gender": translation.get('gen'),
                 "frequency": translation.get('fr')
             }
@@ -133,7 +133,7 @@ def extract_synonym(json: dict) -> list | None:
 
                 obj = {
                     "text": synonym.get('text'),
-                    "part_of_speech": synonym.get('pos'),
+                    "part_of_speech": _set_part_of_speech(synonym.get('pos')),
                     "gender": synonym.get('gen'),
                     "frequency": synonym.get('fr')
                 }
@@ -192,3 +192,6 @@ def convert_dict_value_to_lowercase(input_dict):
 
     return result
 
+def _set_part_of_speech(part_of_speech: str) -> PartOfSpeech:
+    obj = PartOfSpeech.objects.get(text=part_of_speech)
+    return obj
