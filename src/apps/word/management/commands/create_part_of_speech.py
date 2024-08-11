@@ -29,8 +29,9 @@ class Command(BaseCommand):
         part_of_speech_map = {}
 
         for word in words_to_update:
-            part_of_speech_name = word.part_of_speech_name
-
+            # part_of_speech_name = word.part_of_speech_name
+            part_of_speech_name = ''
+            
             if part_of_speech_name:
                 part_of_speech, created = PartOfSpeech.objects.get_or_create(
                     text=part_of_speech_name

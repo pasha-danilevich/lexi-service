@@ -85,6 +85,7 @@ def extract_word(json: dict) -> dict:
         "text": word.get('text'),
         "part_of_speech": word.get('pos'),
         "transcription": word.get('ts'),
+        "form": word.get('fl'),
     }
     return convert_dict_value_to_lowercase(obj)
 

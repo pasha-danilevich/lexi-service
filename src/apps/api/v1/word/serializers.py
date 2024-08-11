@@ -41,8 +41,7 @@ class WordSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Word
-        fields = ['pk', 'text', 'part_of_speech', 'transcription',
-                  'translations', 'synonyms', 'meanings']
+        fields = ['pk', 'text', 'part_of_speech', 'transcription', 'form'] + ['translations', 'synonyms', 'meanings']
         
     def get_part_of_speech(self, obj: Word):
         return obj.part_of_speech.text if obj.part_of_speech else None

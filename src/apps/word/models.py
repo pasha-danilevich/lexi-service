@@ -37,6 +37,13 @@ class Word(models.Model):
     )
 
     transcription = models.CharField(max_length=100, null=True, blank=True)
+    
+    form = models.CharField(
+        max_length=50, 
+        default=None, 
+        blank=False, 
+        null=True
+    )
 
     translations: 'Translation | models.QuerySet[Translation]'
     synonyms: 'Synonym | models.QuerySet[Synonym]'
