@@ -8,5 +8,6 @@ urlpatterns = [
     path('words/', include('apps.api.v1.word.urls')),
     path('vocabulary/', include('apps.api.v1.vocabulary.urls')),
     path('training/', include('apps.api.v1.training.urls')),
-    path('jwt/', include('apps.api.v1.jwt.urls'))
+    path('jwt/', include('apps.api.v1.jwt.urls')),
+    path('search/', include('apps.api.v1.search.urls'))
 ] 

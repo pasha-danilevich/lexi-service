@@ -87,7 +87,12 @@ class BookmarkListCreate(generics.ListCreateAPIView):
     pagination_class = BookmarkPageNumberPagination
 
     def get_queryset(self):
-        return Bookmark.objects.filter(user_id=self.request.user.pk).order_by('-id')
+        queryset = (
+            Bookmark.objects
+            .filter(user_id=self.request.user.pk)
+            .order_by('-id')
+        )
+        return queryset
 
     def post(self, request, *args, **kwargs):
         user = request.user
