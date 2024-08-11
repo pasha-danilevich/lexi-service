@@ -72,7 +72,6 @@ def get_or_create_word(request_word: str) -> tuple[Word | None, bool]:
                 word_bulk_create(Meaning, word_set['meaning'], word)
                 
         except IntegrityError: # Если возникла ошибка уникальности, пытаемся получить существующее слово
-            print(word_set['word']['text'])
             
             existing_word = Word.objects.get(text=word_set['word']['text'])
             created = False
@@ -92,7 +91,6 @@ def get_related_pk(word: Word, user: User) -> list[int]:
     
     # Получаем все слова из словаря пользователя
     user_dictionary_words = word.dictionary.all(user_id=user.pk)
-    print(user_dictionary_words)
 
     if user_dictionary_words:
         # Возвращаем список первичных ключей переводов, которые добавлял пользователь
