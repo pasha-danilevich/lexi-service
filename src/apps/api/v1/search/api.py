@@ -6,6 +6,8 @@ from rest_framework.request import Request
 
 
 from apps.api.v1.book.api import BookListCreate, BookmarkListCreate, OwnBookList
+from apps.api.v1.vocabulary.api import VocabularyListCreate
+from apps.api.v1.vocabulary.serializers import DictionaryListSerializer
 from apps.book.models import Bookmark
 
 
@@ -86,5 +88,27 @@ class BookmarkListSearch(BookmarkListCreate, BaseSearch):
         return BaseSearch().get_queryset(filters, search_params, queryset)
     
     def post(self, request, *args, **kwargs):
-        print('post---------------------------')
+        return super().list(request, *args, **kwargs)
+    
+
+class VocabularyListSearch(VocabularyListCreate, BaseSearch):
+
+    def get_serializer_class(self):
+        return DictionaryListSerializer
+    
+    def get_filters(self, search_params: str):
+        filters = [
+            Q(word__text__icontains=search_params),
+            Q(translation__text__icontains=search_params),
+        ]
+        return filters
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_params = self.get_search_params()
+        filters = self.get_filters(search_params)
+        
+        return BaseSearch().get_queryset(filters, search_params, queryset)
+    
+    def post(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
