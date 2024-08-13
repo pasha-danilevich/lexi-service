@@ -73,17 +73,17 @@ class VocabularyListCreate(generics.ListCreateAPIView, Vocabulary):
 
     def get_queryset(self):
 
-        
+        user = self.request.user
 
         unique_words = (
-            Dictionary.objects.filter(user_id=49)
+            Dictionary.objects.filter(user_id=user.pk)
             .filter(word_id=OuterRef('word_id'))
             .order_by('word_id', '-date_added')
             .values('id')[:1]
         )
         
         words = Dictionary.objects.filter(
-            user_id=49,
+            user_id=user.pk,
             id__in=Subquery(unique_words)
         ).order_by('-date_added')
 
