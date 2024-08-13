@@ -192,6 +192,6 @@ def convert_dict_value_to_lowercase(input_dict):
 
     return result
 
-def _set_part_of_speech(part_of_speech: str) -> PartOfSpeech:
-    obj = PartOfSpeech.objects.get(text=part_of_speech)
-    return obj
+def _set_part_of_speech(part_of_speech_name: str) -> PartOfSpeech:
+    part_of_speech, _ = PartOfSpeech.objects.get_or_create(text=part_of_speech_name)
+    return part_of_speech
