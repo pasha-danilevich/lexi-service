@@ -17,12 +17,12 @@ SITE_URL = os.getenv("SITE_URL", '')
 # указать хост клиента, если деплой, то еще укащать хост сервера
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", '').split(' ')
 DOMAIN = os.getenv("DOMAIN", '')
+SERVER_DOMAIN = os.getenv("SERVER_DOMAIN", '')
 
 CORS_ALLOWED_ORIGINS = [
     f"http://{DOMAIN}",
     f"https://{DOMAIN}",
 ]
-print(API_VERSION, DEBUG, SITE_URL, ALLOWED_HOSTS, DOMAIN, CORS_ALLOWED_ORIGINS)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'apps.book',
     'apps.word',
     'apps.custom_email',
+    'apps.api.v1.dev',
 
     'rest_framework',
     'corsheaders',
