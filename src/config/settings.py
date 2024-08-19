@@ -14,7 +14,8 @@ Y_KEY = os.getenv("Y_KEY", '')
 API_VERSION = os.getenv("API_VERSION", '')
 DEBUG = os.getenv("DEBUG", 'false').lower() == 'true' 
 SITE_URL = os.getenv("SITE_URL", '')
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", 'werwer').split(' ')
+# указать хост клиента, если деплой, то еще укащать хост сервера
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", '').split(' ')
 CLIENT_DOMAIN = os.getenv("CLIENT_DOMAIN", '')
 DOMAIN = os.getenv("DOMAIN", '')
 
@@ -107,7 +108,7 @@ TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
