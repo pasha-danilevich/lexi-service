@@ -14,7 +14,7 @@ Y_KEY = os.getenv("Y_KEY", '')
 API_VERSION = os.getenv("API_VERSION", '')
 DEBUG = os.getenv("DEBUG", 'false').lower() == 'true' 
 SITE_URL = os.getenv("SITE_URL", '')
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", '').split(' ')
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", 'werwer').split(' ')
 CLIENT_DOMAIN = os.getenv("CLIENT_DOMAIN", '')
 DOMAIN = os.getenv("DOMAIN", '')
 
