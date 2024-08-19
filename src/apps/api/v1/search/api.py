@@ -100,6 +100,7 @@ class VocabularyListSearch(VocabularyListCreate, BaseSearch):
         filters = [
             Q(word__text__icontains=search_params),
             Q(translation__text__icontains=search_params),
+            # Q(word__text__regex=rf'^{search_params}..$')
         ]
         return filters
 
