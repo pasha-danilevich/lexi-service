@@ -15,10 +15,12 @@ API_VERSION = os.getenv("API_VERSION", '')
 DEBUG = os.getenv("DEBUG", 'false').lower() == 'true' 
 SITE_URL = os.getenv("SITE_URL", '')
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", '').split(' ')
+CLIENT_DOMAIN = os.getenv("CLIENT_DOMAIN", '')
 DOMAIN = os.getenv("DOMAIN", '')
 
 CORS_ALLOWED_ORIGINS = [
     f"http://{DOMAIN}",
+    f"https://{DOMAIN}",
 ]
 print(API_VERSION, DEBUG, SITE_URL, ALLOWED_HOSTS, DOMAIN, CORS_ALLOWED_ORIGINS)
 
