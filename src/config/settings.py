@@ -16,7 +16,6 @@ DEBUG = os.getenv("DEBUG", 'false').lower() == 'true'
 SITE_URL = os.getenv("SITE_URL", '')
 # указать хост клиента, если деплой, то еще укащать хост сервера
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", '').split(' ')
-CLIENT_DOMAIN = os.getenv("CLIENT_DOMAIN", '')
 DOMAIN = os.getenv("DOMAIN", '')
 
 CORS_ALLOWED_ORIGINS = [
