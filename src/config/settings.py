@@ -1,37 +1,25 @@
 from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
+import dj_database_url
 import os
 
 load_dotenv()
 
 
-def p(text, green=True):
-    if green:
-        print(f"\033[32m{text}\033[0m")
-    else:
-        print(f'\033[31m{text}\033[0m')
-
-
-def print_local_var(locals):
-    for var, value in locals.items():
-        print(f'{var} = {value}')
-    print('-----------------------------')
-
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure--v2ki54-tod(@cxcft#cxf7m8hy1rv5b9!!@d_tvxkhhy!h3_&'
+SECRET_KEY = os.getenv("SECRET_KEY", '')
+Y_KEY = os.getenv("Y_KEY", '')
+API_VERSION = os.getenv("API_VERSION", '')
+DEBUG = os.getenv("DEBUG", 'false').lower() == 'true' 
+SITE_URL = os.getenv("SITE_URL", '')
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", '').split(' ')
+DOMAIN = os.getenv("DOMAIN", '')
 
-Y_KEY = os.getenv("Y_KEY")
-
-API_VERSION = 'v1'
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-SITE_URL = "http://127.0.0.1:8000"
-
-ALLOWED_HOSTS = []
+CORS_ALLOWED_ORIGINS = [
+    f"http://{DOMAIN}",
+]
 
 
 INSTALLED_APPS = [
@@ -86,23 +74,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
+DATABASE_URL = os.getenv("DATABASE_URL", '')
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv("NAME"),
-        'USER': os.getenv("USER"),
-        'PASSWORD': os.getenv("PASSWORD"),
-        'PORT': os.getenv("PORT"),
-        'HOST': os.getenv("HOST"),
-    }
+    'default': dj_database_url.parse(DATABASE_URL)
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -239,11 +215,7 @@ TRAINING_TYPES_ID = {
     # 'audio': 5
 }
 
-# CORS
-DOMAIN = 'localhost:5173'
-CORS_ALLOWED_ORIGINS = [
-    f"http://{DOMAIN}",
-]
+
 
 
 LOGGING = {
