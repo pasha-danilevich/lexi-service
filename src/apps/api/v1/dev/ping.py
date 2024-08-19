@@ -7,9 +7,10 @@ def ping_server():
         try:
             response = requests.get(f'http://{SERVER_DOMAIN}/api/dev/ping/')
             print(f'Ping response status code: {response.status_code}')
+            time.sleep(5)
         except Exception as e:
             print(f'Error pinging server: {e}')
         
 
-        time.sleep(300)  # 5 минут
+        time.sleep(60)  # 1 минута
       
