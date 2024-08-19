@@ -2,7 +2,7 @@ import requests
 from rest_framework.response import Response
 from rest_framework import status
 from apps.word.models import PartOfSpeech
-from config.local_settings import Y_KEY
+from config.settings import Y_KEY
 
 
 from datetime import datetime

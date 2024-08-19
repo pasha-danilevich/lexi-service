@@ -1,6 +1,9 @@
 from datetime import timedelta
 from pathlib import Path
-from . import local_settings as local
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 
 def p(text, green=True):
@@ -19,6 +22,9 @@ def print_local_var(locals):
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure--v2ki54-tod(@cxcft#cxf7m8hy1rv5b9!!@d_tvxkhhy!h3_&'
+
+Y_KEY = os.getenv("Y_KEY")
+
 API_VERSION = 'v1'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -86,12 +92,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': local.NAME,
-        'USER': local.USER,
-        'PASSWORD': local.PASSWORD,
-        'PORT': local.PORT,
-        # 'HOST': '192.168.1.43', not working
-        'HOST': local.HOST,
+        'NAME': os.getenv("NAME"),
+        'USER': os.getenv("USER"),
+        'PASSWORD': os.getenv("PASSWORD"),
+        'PORT': os.getenv("PORT"),
+        'HOST': os.getenv("HOST"),
     }
 }
 
