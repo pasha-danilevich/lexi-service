@@ -20,7 +20,7 @@ DOMAIN = os.getenv("DOMAIN", '')
 CORS_ALLOWED_ORIGINS = [
     f"http://{DOMAIN}",
 ]
-
+print(API_VERSION, DEBUG, SITE_URL, ALLOWED_HOSTS, DOMAIN, CORS_ALLOWED_ORIGINS)
 
 INSTALLED_APPS = [
     'django.contrib.admin',
