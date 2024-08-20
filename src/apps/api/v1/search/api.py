@@ -5,7 +5,8 @@ from django.db.models import Q, QuerySet
 from rest_framework.request import Request
 
 
-from apps.api.v1.book.api import BookListCreate, BookmarkListCreate, OwnBookList
+from apps.api.v1.book.api import BookListCreate, OwnBookList
+from apps.api.v1.bookmark.api import BookmarkListCreate
 from apps.api.v1.vocabulary.api import VocabularyListCreate
 from apps.api.v1.vocabulary.serializers import DictionaryListSerializer
 from apps.book.models import Bookmark

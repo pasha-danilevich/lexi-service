@@ -1,10 +1,10 @@
 from typing import cast
 from django.db import IntegrityError
 from django.shortcuts import redirect
+
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from rest_framework import generics, mixins, status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import generics, status
 
 from apps.api.v1.book.permissions import IsNotPrivetOrOwner, IsOwnerOrReadOnly
 from apps.api.v1.book.services import get_user_bookmark
@@ -12,8 +12,8 @@ from apps.book.models import Book, Bookmark
 from apps.book.utils import json_to_book
 from apps.user.models import User
 
-from .pagination import BookListPageNumberPagination, BookmarkPageNumberPagination
-from .serializers import BookListCreateSerializer, BookRetrieveSerializer, BookmarkListSerializer, BookmarkRetrieveCreateSerializer
+from .pagination import BookListPageNumberPagination
+from .serializers import BookListCreateSerializer, BookRetrieveSerializer
 
 
 class GenericBook(generics.GenericAPIView):
@@ -83,48 +83,3 @@ class BookRetrieve(generics.RetrieveAPIView, GenericBook):
 
         return Response(serializer.data)
 
-
-class BookmarkListCreate(generics.ListCreateAPIView):
-
-    serializer_class = BookmarkListSerializer
-    permission_classes = [IsAuthenticated]
-    pagination_class = BookmarkPageNumberPagination
-
-    def get_queryset(self):
-        queryset = (
-            Bookmark.objects
-            .filter(user_id=self.request.user.pk)
-            .order_by('-id')
-        )
-        return queryset
-
-    def post(self, request, *args, **kwargs):
-        user = request.user
-
-        try:
-            book = Book.objects.get(id=request.data['book_id'])
-        except Book.DoesNotExist:
-            data = {'details': 'Книга не найдена'}
-            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
-
-        target_page = request.data['target_page']
-
-        bookmark, is_created = Bookmark.objects.update_or_create(
-            user=user,
-            book=book,
-            defaults={
-                'target_page': target_page
-            }
-        )
-        data = {"pk": bookmark.pk}
-
-        if is_created:
-            return Response(data=data, status=status.HTTP_201_CREATED)
-
-        return Response(data=data, status=status.HTTP_200_OK)
-
-
-class BookmarkDeleteView(generics.DestroyAPIView):
-    queryset = Bookmark.objects.all()
-    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
-    lookup_field = "pk"

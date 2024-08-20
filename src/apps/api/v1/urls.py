@@ -10,5 +10,7 @@ urlpatterns = [
     path('training/', include('apps.api.v1.training.urls')),
     path('jwt/', include('apps.api.v1.jwt.urls')),
     path('search/', include('apps.api.v1.search.urls')),
+    path('bookmarks/', include('apps.api.v1.bookmark.urls')),
+    
     path('dev/', include('apps.api.v1.dev.urls'))
 ] 
