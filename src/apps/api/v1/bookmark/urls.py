@@ -1,7 +1,10 @@
-from django.urls import path
-from .api import BookmarkListCreate, BookmarkDeleteView
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .api import BookmarkViewSet
+
+router = DefaultRouter()
+router.register(r'bookmarks', BookmarkViewSet, basename='bookmark')
 
 urlpatterns = [
-    path('', BookmarkListCreate.as_view(), name='bookmark-list-create'),
-    path('<int:pk>/', BookmarkDeleteView.as_view(), name='bookmark-delete'),
+    path('', include(router.urls)),
 ]

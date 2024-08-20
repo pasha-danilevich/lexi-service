@@ -6,7 +6,7 @@ from rest_framework.request import Request
 
 
 from apps.api.v1.book.api import BookListCreate, OwnBookList
-from apps.api.v1.bookmark.api import BookmarkListCreate
+from apps.api.v1.bookmark.api import BookmarkViewSet
 from apps.api.v1.vocabulary.api import VocabularyListCreate
 from apps.api.v1.vocabulary.serializers import DictionaryListSerializer
 from apps.book.models import Bookmark
@@ -69,7 +69,7 @@ class MyBookListSearch(BaseSearch, OwnBookList):
         return super().get_queryset(filters, search_params, queryset)
 
 
-class BookmarkListSearch(BookmarkListCreate, BaseSearch):
+class BookmarkListSearch(BaseSearch):
     
     def get_filters(self, search_params: str):
         filters = [
@@ -80,7 +80,7 @@ class BookmarkListSearch(BookmarkListCreate, BaseSearch):
         return filters
     
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = BookmarkViewSet().get_queryset()
 
 
         search_params = self.get_search_params()
