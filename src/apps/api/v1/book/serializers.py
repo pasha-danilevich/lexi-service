@@ -21,11 +21,12 @@ class BookListCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Book
-        fields = common_book_fields + ['book']
+        fields = common_book_fields + ['book', 'is_privet']
         extra_kwargs = {
             'slug': {'read_only': True},
             'author_upload': {'write_only': True},
-            'book': {'write_only': True}
+            'book': {'write_only': True},
+            'is_privet': {'write_only': True},
         }
 
 

@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import generics, mixins, status
 from rest_framework.permissions import IsAuthenticated
 
-from apps.api.v1.book.permissions import IsOwnerOrReadOnly
+from apps.api.v1.book.permissions import IsNotPrivetOrOwner, IsOwnerOrReadOnly
 from apps.api.v1.book.services import get_user_bookmark
 from apps.book.models import Book, Bookmark
 from apps.book.utils import json_to_book
@@ -42,6 +42,9 @@ class BookListCreate(generics.ListCreateAPIView, GenericBook):
         except IntegrityError:
             data = {'details': 'Книга с таким название и автором уже существует'}
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+        
+    def get_queryset(self):
+        return self.queryset.filter(is_privet=False)
 
 
 class OwnBookList(generics.ListAPIView, GenericBook):
@@ -61,6 +64,7 @@ class BookRetrieve(generics.RetrieveAPIView, GenericBook):
     serializer_class = BookRetrieveSerializer
     pagination_class = None
     lookup_field = 'slug'
+    permission_classes = [IsNotPrivetOrOwner]
 
     def get(self, request, page, *args, **kwargs):
         obj: Book = super().get_object()

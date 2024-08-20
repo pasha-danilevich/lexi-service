@@ -18,6 +18,7 @@ class Book(models.Model):
         null=True
         )
     book = models.JSONField(default=book_default, null=False)
+    is_privet = models.BooleanField(default=False)
     
     def __str__(self) -> str:
         return self.title
