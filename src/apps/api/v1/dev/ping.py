@@ -11,6 +11,10 @@ is_pinging = False
 
 def ping_server():
     global is_pinging
+    
+    if SERVER_DOMAIN == 'localhost:8000':
+        return
+    
     while True:
         if not is_pinging:
             is_pinging = True  # Устанавливаем флаг, чтобы предотвратить повторный запуск
