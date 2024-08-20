@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
@@ -19,12 +20,7 @@ class BookmarkViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         user = request.user
-
-        try:
-            book = Book.objects.get(id=request.data['book_id'])
-        except Book.DoesNotExist:
-            return Response({'details': 'Книга не найдена'}, status=status.HTTP_404_NOT_FOUND)
-
+        book = get_object_or_404(Book, id=request.data['book_id'])
         target_page = request.data['target_page']
 
         bookmark, is_created = Bookmark.objects.update_or_create(
@@ -38,8 +34,3 @@ class BookmarkViewSet(viewsets.ModelViewSet):
             return Response(data=data, status=status.HTTP_201_CREATED)
 
         return Response(data=data, status=status.HTTP_200_OK)
-
-    def get_permissions(self):
-        if self.action == 'destroy':
-            self.permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
-        return super().get_permissions()
