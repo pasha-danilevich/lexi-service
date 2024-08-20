@@ -4,8 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
-from apps.api.v1.book.permissions import IsOwnerOrReadOnly
-from apps.api.v1.bookmark.pagination import BookmarkPageNumberPagination
+from .pagination import BookmarkPageNumberPagination
 from apps.book.models import Bookmark, Book
 
 from .serializers import BookmarkListSerializer
