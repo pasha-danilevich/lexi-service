@@ -4,19 +4,6 @@ from apps.api.v1.book.serializers import BookListCreateSerializer
 from apps.book.models import Bookmark
 
 
-class BookmarkRetrieveCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Bookmark
-        fields = [
-            'pk',
-            'book'
-            'target_page'
-        ]
-        extra_kwargs = {
-            'book': {'write_only': True}
-        }
-
-
 class BookmarkListSerializer(serializers.ModelSerializer):
 
     book_cover = serializers.SerializerMethodField()

@@ -64,14 +64,3 @@ class BookRetrieveSerializer(serializers.ModelSerializer):
         pages_set = obj.book[start:end]
         return pages_set
     
-class BookmarkRetrieveCreateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Bookmark
-        fields = [
-            'pk',
-            'book'
-            'target_page'
-        ]
-        extra_kwargs = {
-            'book': {'write_only': True}
-        }
