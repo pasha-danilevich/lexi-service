@@ -1,6 +1,6 @@
 from typing import cast
 from rest_framework import serializers
-from apps.api.v1.book.serializers import BookListCreateSerializer
+from apps.api.v1.book.serializers import BookListSerializer
 from apps.book.models import Bookmark
 
 
@@ -14,7 +14,7 @@ class BookmarkListSerializer(serializers.ModelSerializer):
         extra_kwargs = {'book_cover': {'read_only': True}}
 
     def get_book_cover(self, obj):
-        serializer = BookListCreateSerializer(obj.book)
+        serializer = BookListSerializer(obj.book)
         book_data = cast(dict, serializer.data)
         data = {
             "title": book_data['title'],

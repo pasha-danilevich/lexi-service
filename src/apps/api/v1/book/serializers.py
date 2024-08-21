@@ -1,10 +1,16 @@
+from django.db import IntegrityError
 from rest_framework import serializers
 from apps.api.v1.book.services import get_start_end, get_user_bookmark
 from apps.book.models import Book, Bookmark
+from apps.book.utils import json_to_book
 from apps.user.models import User
 from config.settings import PAGE_SLICE_SIZE
 
 
+from rest_framework import serializers
+from apps.book.models import Book
+
+# Общие поля для книги
 common_book_fields = [
     'pk',
     'title',
@@ -14,20 +20,47 @@ common_book_fields = [
     'slug',
 ]
 
-
-class BookListCreateSerializer(serializers.ModelSerializer):
-
+class BookListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
-        fields = common_book_fields + ['book', 'is_privet']
+        fields = common_book_fields # Поля только для чтения
+
+class BookCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Book
+        fields = common_book_fields + ['book', 'is_privet']  # Поля для создания
         extra_kwargs = {
-            'slug': {'read_only': True},
-            'author_upload': {'write_only': True},
             'book': {'write_only': True},
-            'is_privet': {'write_only': True},
+            'slug': {'read_only': True},
+            'page_count': {'read_only': True},
         }
+    
+    def validate(self, attrs):
+        print(attrs)
+        book = attrs.get('book')
+        user = self.context['request'].user
+        
+        # if isinstance(book, InMemoryUploadedFile):
+        #     book = ... # достать текст
+        
+        if isinstance(book, str):
+            if not book or len(book) == 0:
+                data = {'book': ['Это поле не может быть пустым']}
+                raise serializers.ValidationError({'book': ['Это поле не может быть пустым']})
+            
+            book = json_to_book(book)
+            attrs['book'] = book
 
+        attrs['page_count'] = len(book)
+        attrs['author_upload'] = user
 
+        return attrs
+    
+    def create(self, validated_data):
+        try:
+            return super().create(validated_data)
+        except IntegrityError:
+            raise serializers.ValidationError({'details': 'Книга с таким названием и автором уже существует'})
 
 class BookRetrieveSerializer(serializers.ModelSerializer):
 

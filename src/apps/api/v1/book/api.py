@@ -1,19 +1,22 @@
 from typing import cast
 from django.db import IntegrityError
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import generics, status
+from rest_framework import viewsets
+from rest_framework.decorators import action
 
 from apps.api.v1.book.permissions import IsNotPrivetOrOwner, IsOwnerOrReadOnly
 from apps.api.v1.book.services import get_user_bookmark
-from apps.book.models import Book, Bookmark
+from apps.book.models import Book
 from apps.book.utils import json_to_book
 from apps.user.models import User
 
 from .pagination import BookListPageNumberPagination
-from .serializers import BookListCreateSerializer, BookRetrieveSerializer
+from .serializers import BookCreateSerializer, BookListSerializer, BookRetrieveSerializer
 
 
 class GenericBook(generics.GenericAPIView):
@@ -21,65 +24,59 @@ class GenericBook(generics.GenericAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
 
-class BookListCreate(generics.ListCreateAPIView, GenericBook):
-    serializer_class = BookListCreateSerializer
+class BookViewSet(viewsets.ModelViewSet):
     pagination_class = BookListPageNumberPagination
-
-    def post(self, request, *args, **kwargs):
-        book = request.data.get('book')
-
-        if not book or len(book) == 0:
-            data = {'book': ['Это поле не может быть пустым']}
-            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-
-        book = json_to_book(request.data['book'])
-        request.data['book'] = book
-        request.data['page_count'] = len(book)
-        request.data['author_upload'] = request.user.id
-
-        try:
-            return super().post(request, *args, **kwargs)
-        except IntegrityError:
-            data = {'details': 'Книга с таким название и автором уже существует'}
-            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-        
-    def get_queryset(self):
-        return self.queryset.filter(is_privet=False)
-
-
-class OwnBookList(generics.ListAPIView, GenericBook):
-    serializer_class = BookListCreateSerializer
-    pagination_class = BookListPageNumberPagination
-
-    def get_queryset(self):
-        user_id = self.request.user.pk
-        return self.queryset.filter(author_upload_id=user_id)
-
-
-class OwnBookDelete(generics.DestroyAPIView, GenericBook):
-    lookup_field = 'pk'
-
-
-class BookRetrieve(generics.RetrieveAPIView, GenericBook):
-    serializer_class = BookRetrieveSerializer
-    pagination_class = None
+    queryset = Book.objects.all().order_by('-id')
     lookup_field = 'slug'
-    permission_classes = [IsNotPrivetOrOwner]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
-    def get(self, request, page, *args, **kwargs):
-        obj: Book = super().get_object()
-        user = cast(User, self.request.user)
-        url_page = page
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return BookListSerializer
+        elif self.action == 'create':
+            return BookCreateSerializer
+        elif self.action == 'retrieve':
+            return BookRetrieveSerializer
+        return super().get_serializer_class()
+    
+    def get_permissions(self):
+        if self.action == 'retrieve':
+            return [IsNotPrivetOrOwner()] 
+        return super().get_permissions()  # Для остальных 
+
+
+    def get_queryset(self):
+        if self.action == 'retrieve':
+            return self.queryset
+        return self.queryset.filter(is_privet=False)
+    
+    def retrieve(self, request, page, *args, **kwargs):
+        obj: Book = self.get_object()
+        user = request.user
         bookmark = get_user_bookmark(obj, user=user)
         serializer = self.get_serializer(obj)
 
         if bookmark:
-            page = bookmark.get('target_page')
-
-            if url_page == page:
+            bookmark_page = bookmark.get('target_page')
+            
+            if page == bookmark_page:
                 return Response(serializer.data)
 
-            return redirect('books-retrieve', slug=obj.slug, page=page)
+            return redirect('book-retrieve', slug=obj.slug, page=bookmark_page)
 
         return Response(serializer.data)
+
+
+# class OwnBookList(generics.ListAPIView, GenericBook):
+#     serializer_class = BookListCreateSerializer
+#     pagination_class = BookListPageNumberPagination
+
+#     def get_queryset(self):
+#         user_id = self.request.user.pk
+#         return self.queryset.filter(author_upload_id=user_id)
+
+
+# class OwnBookDelete(generics.DestroyAPIView, GenericBook):
+#     lookup_field = 'pk'
+
 

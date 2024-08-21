@@ -51,11 +51,11 @@ def get_start_end(context, obj: Book):
     return (start, end)
 
 @overload
-def get_user_bookmark(obj, user: AnonymousUser) -> None:
+def get_user_bookmark(obj: Book, user: AnonymousUser) -> None:
     ...
 
 @overload
-def get_user_bookmark(obj, user: User) -> Dict[str, int]:
+def get_user_bookmark(obj: Book, user: User) -> Dict[str, int]:
     ...
 
 def get_user_bookmark(obj, user):

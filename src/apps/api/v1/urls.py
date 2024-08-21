@@ -1,7 +1,7 @@
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
+from rest_framework.routers import SimpleRouter
 from apps.api.v1.bookmark.api import BookmarkViewSet
-# from apps.api.v1.book.api import BookViewSet
+from apps.api.v1.book.api import BookViewSet
 # from apps.api.v1.home.api import HomeViewSet
 # from apps.api.v1.user.api import UserViewSet
 # from apps.api.v1.word.api import WordViewSet
@@ -10,9 +10,17 @@ from apps.api.v1.bookmark.api import BookmarkViewSet
 # from apps.api.v1.jwt.api import JWTViewSet
 # from apps.api.v1.search.api import SearchViewSet
 
-router = DefaultRouter()
+router = SimpleRouter()
 router.register(r'bookmarks', BookmarkViewSet, basename='bookmark')
-# router.register(r'books', BookViewSet, basename='book')
+
+book_list_create = BookViewSet.as_view({
+    'get': 'list',
+    'post': 'create'
+})
+book_retrieve = BookViewSet.as_view({
+    'get': 'retrieve'
+})
+
 # router.register(r'home', HomeViewSet, basename='home')
 # router.register(r'users', UserViewSet, basename='user')
 # router.register(r'words', WordViewSet, basename='word')
@@ -24,9 +32,17 @@ router.register(r'bookmarks', BookmarkViewSet, basename='bookmark')
 
 urlpatterns = [
     path('', include(router.urls)),
-    
+    # home
     path('home/', include('apps.api.v1.home.urls')),
-    path('books/', include('apps.api.v1.book.urls')),
+    
+    # bookmark
+    # path('books/', book_list_create, name='book-list-create'),
+    
+    # book
+    path('books/', book_list_create, name='book-list-create'),
+    path('books/<slug:slug>/<int:page>', book_retrieve, name='book-retrieve'),
+    # path('my-books/', book_list_create, name='book-list-create'),
+    
     path('users/', include('apps.api.v1.user.urls')),
     path('words/', include('apps.api.v1.word.urls')),
     path('vocabulary/', include('apps.api.v1.vocabulary.urls')),
