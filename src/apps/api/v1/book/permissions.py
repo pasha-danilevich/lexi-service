@@ -24,7 +24,6 @@ class IsNotPrivetOrOwner(permissions.BasePermission):
     
     
     def has_object_permission(self, request, view, obj: Book):
-        print(obj, obj.author_upload, request.user, obj.is_privet)
         if obj.author_upload == request.user:
             return True
         elif not obj.is_privet:
