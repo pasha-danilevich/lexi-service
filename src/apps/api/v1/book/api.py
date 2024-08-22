@@ -1,4 +1,5 @@
 from django.shortcuts import redirect
+from django.db.models import QuerySet, Q
 
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -34,7 +35,17 @@ class BookViewSet(viewsets.ModelViewSet):
         if self.action in ['retrieve', 'destroy']:
             return [IsNotPrivetOrOwner()] 
         return super().get_permissions() 
+    
+    def filter_queryset(self, queryset: QuerySet):
+        # Получаем параметр поиска из запроса
+        search_query = self.request.query_params.get('search', None) # type: ignore
 
+        if search_query:
+            queryset = queryset.filter(
+                Q(title__icontains=search_query) |
+                Q(author__icontains=search_query)
+            )
+        return super().filter_queryset(queryset)
 
     def get_queryset(self):
         if self.action in ['retrieve', 'destroy']:
