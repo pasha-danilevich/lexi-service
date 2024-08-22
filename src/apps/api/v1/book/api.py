@@ -39,6 +39,9 @@ class BookViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         if self.action in ['retrieve', 'destroy']:
             return self.queryset
+        elif self.action == 'list_own_books':
+            user_id = self.request.user.pk
+            return self.queryset.filter(author_upload_id=user_id)
         return self.queryset.filter(is_privet=False)
     
     def retrieve(self, request, page, *args, **kwargs):
@@ -58,15 +61,8 @@ class BookViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     
     def list_own_books(self, request):
-        user_id = request.user.pk
-        own_books = self.queryset.filter(author_upload_id=user_id)
-        serializer = self.get_serializer(own_books, many=True)
-        return Response(serializer.data)
+        return super().list(request=request)
 
-    def destroy(self, request, *args, **kwargs):
-        obj = self.get_object()
-        self.perform_destroy(obj)
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 
