@@ -1,8 +1,8 @@
 from typing import cast
-from django.db import transaction
 
+from django.db import transaction
 from django.http import Http404
-from django.db.models import Subquery, OuterRef, QuerySet
+from django.db.models import Subquery, OuterRef, QuerySet, Q
 
 from rest_framework import generics,  status
 from rest_framework.response import Response
@@ -88,11 +88,17 @@ class VocabularyListCreate(generics.ListCreateAPIView, Vocabulary):
         ).order_by('-date_added')
 
         return words
+    
+    def filter_queryset(self, queryset: QuerySet):
+        # Получаем параметр поиска из запроса
+        search_query = self.request.query_params.get('search', None) # type: ignore
         
-
-
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        if search_query:
+            queryset = queryset.filter(
+                Q(word__text__icontains=search_query) |
+                Q(translation__text__icontains=search_query)
+            )
+        return super().filter_queryset(queryset)
 
 
 class VocabularyDelete(generics.DestroyAPIView, Vocabulary):
