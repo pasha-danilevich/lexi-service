@@ -1,9 +1,14 @@
 import os
+import io
 from ebooklib import epub, ITEM_DOCUMENT
 from docx import Document
 from lxml import etree
 from bs4 import BeautifulSoup
 from django.core.files.uploadedfile import InMemoryUploadedFile
+
+import tempfile
+from ebooklib import epub, ITEM_DOCUMENT
+from bs4 import BeautifulSoup
 
 class TextExtractor:
     def __init__(self, uploaded_file: InMemoryUploadedFile):
@@ -25,14 +30,28 @@ class TextExtractor:
         else:
             raise ValueError(f"Unsupported file format: {self.file_extension}")
 
+
+
     def _extract_text_from_epub(self):
-        book = epub.read_epub(self.file)
+        # Создаем временный файл из InMemoryUploadedFile
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.epub') as temp_file:
+            # Записываем содержимое InMemoryUploadedFile в временный файл
+            temp_file.write(self.file.read())
+            temp_file.flush()
+            
+            # Читаем EPUB из временного файла
+            book = epub.read_epub(temp_file.name)
+        
+        # Удаляем временный файл после использования
+        os.unlink(temp_file.name)
+
         text = []
         for item in book.get_items():
             if item.get_type() == ITEM_DOCUMENT:
                 content = item.get_content().decode('utf-8', errors='ignore')  # Игнорировать ошибки декодирования
                 soup = BeautifulSoup(content, 'html.parser')
                 text.append(soup.get_text(separator='\n'))
+        
         return '\n'.join(text)
 
     def _extract_text_from_txt(self):
@@ -47,6 +66,9 @@ class TextExtractor:
         root = tree.getroot()
         namespace = {'fb2': 'http://www.gribuser.ru/xml/fictionbook/2.0'}
         text_elements = root.xpath('//fb2:body//fb2:p', namespaces=namespace)
-        text_list = [etree.tostring(element) for element in text_elements]
+        
+        # Декодируем байтовые строки в обычные строки
+        text_list = [etree.tostring(element, encoding='unicode', method='text') for element in text_elements]
+        
         return '\n'.join(text_list)
   
