@@ -9,6 +9,7 @@ from apps.api.v1.book.text_extractor import TextExtractor
 from apps.book.models import Book
 from apps.book.utils import json_to_book
 from apps.user.models import User
+from rest_framework.exceptions import ValidationError
 
 from config.settings import PAGE_SLICE_SIZE
 
@@ -47,6 +48,18 @@ class BaseBookCreateSerializer(serializers.ModelSerializer):
         attrs['author_upload'] = self.context['request'].user
         attrs['page_count'] = len(book)
         return super().validate(attrs)
+
+    # TODO
+    # save отлавить ошибки уникальности и дургие ошибки
+    def create(self, validated_data):
+        try:
+            return super().create(validated_data)
+        except IntegrityError as e:
+            # Обработка ошибки уникальности
+            raise ValidationError({'details': 'Запись с такими данными уже существует.'})
+        except Exception as e:
+            # Обработка других ошибок
+            raise ValidationError({'details': f'Произошла ошибка: {str(e)}'})
 
 
 class FileBookCreateSerializer(BaseBookCreateSerializer):
