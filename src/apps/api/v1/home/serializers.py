@@ -1,40 +1,31 @@
-from rest_framework import serializers
 from django.db.models import Q
+
+from rest_framework import serializers
 
 from apps.book.models import Book
 from apps.word.models import Dictionary
-from .services import get_list_words
-
-from django.utils.timezone import localtime
-
 
 
 class HomeSerializer(serializers.Serializer):
     learning_words = serializers.IntegerField()
     upload_books = serializers.IntegerField()
     new_words_today = serializers.IntegerField()
-    recently_added_words = serializers.ListField(child=serializers.CharField())
-    
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.user = self.context['request'].user
         self.initial_data = self.create_initial_data()
-        
+
     def create_initial_data(self):
-        
-        dictionary = Dictionary.objects.all(self.user.id).order_by('-id')   
+
+        dictionary = Dictionary.objects.all(self.user.id).order_by('-id')
         new_words_today = dictionary.get_new_words_today()
         upload_books = Book.objects.filter(author_upload=self.user.id)
-        
+
         data = {
             'learning_words': dictionary.count(),
             'new_words_today': new_words_today.count(),
-            'upload_books': upload_books.count(),
-            'recently_added_words': get_list_words(dictionary=dictionary[:5])
+            'upload_books': upload_books.count()
         }
-        
-        return data
-        
-            
 
+        return data
