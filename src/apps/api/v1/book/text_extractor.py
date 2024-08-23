@@ -17,7 +17,11 @@ class TextExtractor:
         
         self.file = uploaded_file
         self.file_extension = os.path.splitext(uploaded_file.name)[1].lower()
-
+    
+    @staticmethod
+    def supported_format():
+        return ['.epub', '.txt', '.docx', '.fb2']
+    
     def extract_text(self):
         if self.file_extension == '.epub':
             return self._extract_text_from_epub()
@@ -68,7 +72,7 @@ class TextExtractor:
         text_elements = root.xpath('//fb2:body//fb2:p', namespaces=namespace)
         
         # Декодируем байтовые строки в обычные строки
-        text_list = [etree.tostring(element, encoding='unicode', method='text') for element in text_elements]
+        text_list = [etree.tostring(element, encoding='unicode', method='text') for element in text_elements] # type: ignore
         
         return '\n'.join(text_list)
   

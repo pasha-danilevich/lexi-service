@@ -71,7 +71,12 @@ class FileBookCreateSerializer(BaseBookCreateSerializer):
     def validate_book(self, value):
         if isinstance(value, InMemoryUploadedFile):
             text_extractor = TextExtractor(uploaded_file=value)
-            value = text_extractor.extract_text()  
+            try:
+                value = text_extractor.extract_text()
+            except ValueError:
+                available_formats = ' '.join(TextExtractor.supported_format())
+                info = f'Данный формат не поддерживается. Доступные форматы: {available_formats}'
+                raise ValidationError(info)
         return json_to_book(value)
 
 
