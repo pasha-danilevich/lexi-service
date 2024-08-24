@@ -43,7 +43,6 @@ class BaseBookCreateSerializer(serializers.ModelSerializer):
 
 
     def validate(self, attrs):
-        print(attrs, self.__class__.__name__)
         book = attrs['book']
         attrs['author_upload'] = self.context['request'].user
         attrs['page_count'] = len(book)

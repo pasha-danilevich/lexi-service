@@ -31,6 +31,10 @@ class BookViewSet(viewsets.ModelViewSet):
         
         elif self.action == 'create':
             book = self.request.data.get('book') # type: ignore
+            
+            if not book:
+                raise ValueError({'details': 'Значени book не переданно.'})
+            
             if isinstance(book, str):
                 return JsonBookCreateSerializer
             elif isinstance(book, InMemoryUploadedFile):
