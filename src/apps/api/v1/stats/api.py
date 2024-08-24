@@ -6,7 +6,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
-from apps.api.v1.stats.services import get_list_words, get_words_count_on_levels
+from apps.api.v1.stats.services import get_words_count_on_levels
 from apps.api.v1.vocabulary.api import Vocabulary
 from apps.word.managers import DictionaryQuerySet
 from apps.word.models import Dictionary, Training
@@ -21,8 +21,20 @@ class RecentlyWord(generics.GenericAPIView):
 
     def get(self, request):
         user = self.request.user
-        dictionary = Dictionary.objects.all(user.pk).order_by('-id')   
-        data = get_list_words(dictionary=dictionary[:5])
+        
+        dictionary = Dictionary.objects.all(
+            user_id=user.pk
+        ).select_related(
+            'word', 
+            'translation'
+        ).values(
+            'id', 
+            'word__text',
+            'translation__text', 
+            'date_added'
+        ).order_by('-date_added')[:5]
+            
+        data = word_list = [entry for entry in dictionary]
         return Response(data=data)
 
 
