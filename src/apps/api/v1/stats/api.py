@@ -15,16 +15,10 @@ from config.settings import TRAINING_TYPES_ID
 
 
 
-class RecentlyWord(generics.GenericAPIView):
-    permission_classes = [IsAuthenticated]
+class RecentlyWord(Vocabulary):
 
-
-    def get(self, request):
-        user = self.request.user
-        
-        dictionary = Dictionary.objects.all(
-            user_id=user.pk
-        ).select_related(
+    def get(self, request):     
+        dictionary = self.get_queryset().select_related(
             'word', 
             'translation'
         ).values(
