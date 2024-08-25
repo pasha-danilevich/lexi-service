@@ -1,15 +1,14 @@
+from typing import cast
 
-def _count_occurrences(arr, n):
-    result = [0] * n
-    for num in arr:
-        if num <= n:
-            result[num - 1] += 1
-    return result
+from config.settings import TRAINING_TYPES_ID
 
 
-def get_words_count_on_levels(levels_length: int, training_list) -> list:
-    lvl_list = []
-    for training in training_list:
-        lvl_list.append(training.lvl)
-    result = _count_occurrences(lvl_list, levels_length)
-    return result
+
+def create_lvl_list(counted_word, initial_list, type_id: int, number_iteration):
+    for i, entry in enumerate(counted_word):
+        if entry['type_id'] == type_id:
+            initial_list[i] = entry['word_count'] 
+            number_iteration[0] += 1  # Изменяем значение в списке
+        else:
+            break  
+    return initial_list  

@@ -1,4 +1,3 @@
-from django.http import QueryDict
 from django.shortcuts import redirect
 from django.db.models import QuerySet, Q
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -6,8 +5,6 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import viewsets
-from rest_framework.request import Request
-
 
 from apps.api.v1.book.permissions import IsNotPrivetOrOwner, IsOwnerOrReadOnly
 from apps.api.v1.book.services import get_user_bookmark

@@ -1,16 +1,15 @@
 from typing import cast
 
-from django.db.models import QuerySet
+from django.db.models import Count
 
-from rest_framework import generics, status
+from django.template.backends import django
+from rest_framework import  status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 
-from apps.api.v1.stats.services import get_words_count_on_levels
+from apps.api.v1.stats.services import create_lvl_list
 from apps.api.v1.vocabulary.api import Vocabulary
-from apps.word.managers import DictionaryQuerySet
-from apps.word.models import Dictionary, Training
 from apps.user.models import User
+from apps.word.models import Training
 from config.settings import TRAINING_TYPES_ID
 
 
@@ -32,37 +31,33 @@ class RecentlyWord(Vocabulary):
         return Response(data=data)
 
 
-class VocabularyStats(generics.ListAPIView, Vocabulary):
+class VocabularyStats(Vocabulary):
 
-    def get_value(
-        self,
-        type_id: int,
-        dictionary: DictionaryQuerySet,
-        levels_length: int
-    ):
-        training_list = []
-
-        for word in dictionary:
-            word: Dictionary
-            word_trainig = cast(QuerySet[Training], word.training)
-
-            training_list.extend(word_trainig.filter(type_id=type_id))
-
-        value = get_words_count_on_levels(
-            levels_length=levels_length,
-            training_list=training_list
-        )
-
-        return value
-
-    def list(self, *args, **kwargs):
+    def get(self, *args, **kwargs):
         user = cast(User, self.request.user)
         levels_length = len(user.settings.levels)
-        dictionary = self.get_queryset()
 
+        word_counts = (
+            Training.objects
+            .filter(dictionary__user_id=user.pk) 
+            .values('type_id', 'lvl') 
+            .annotate(word_count=Count('dictionary'))  
+            .order_by('type_id', 'lvl')  # Сортируем по type_id и lvl
+        )
+        initial_list = [0 for _ in range(levels_length)]
+        
+        number_iteration = [0]  # Используем список для хранения значения
+        word_counts = list(word_counts) # Используем список для хранения значения
+        
         data = {
-            type_name: self.get_value(type_id, dictionary, levels_length)
-            for type_name, type_id in TRAINING_TYPES_ID.items()
+            type: create_lvl_list(
+                counted_word=word_counts[number_iteration[0]:],  
+                initial_list=list(initial_list),  # Создаем копию initial_list
+                type_id=id,
+                number_iteration=number_iteration
+            )
+            for type, id 
+            in TRAINING_TYPES_ID.items()
         }
 
-        return Response(data, status=status.HTTP_200_OK)
+        return Response(data=data,  status=status.HTTP_200_OK)
