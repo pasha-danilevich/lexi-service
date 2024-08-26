@@ -1,17 +1,20 @@
 from typing import cast
 
+from django.db import connection
 from django.db import transaction
 from django.http import Http404
-from django.db.models import Subquery, OuterRef, QuerySet, Q
+from django.db.models import QuerySet, Q
 
 from rest_framework import generics,  status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
+from apps.api.v1.vocabulary.sql import VOCABULARY_QUERY
 from apps.user.models import User
 from apps.word.models import Dictionary
+from config.settings import TRAINING_TYPES
 
-from .services import create_traning_for_word
+from .services import create_traning_for_word, make_dict
 from .serializers import DictionarySerializer, DictionaryListSerializer
 from .pagination import VocabularyPageNumberPagination
 
@@ -69,36 +72,35 @@ class VocabularyListCreate(generics.ListCreateAPIView, Vocabulary):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
-
+    
     def get_queryset(self):
-
         user = self.request.user
+        
+        divisor = len(TRAINING_TYPES) # кол-во типов тренировок будет делителем для того, чтобы получить средний уровень для слова
+        
+        with connection.cursor() as cursor:
+            cursor.execute(VOCABULARY_QUERY, [divisor, user.pk])
+            result = cursor.fetchall()
+            
+        return make_dict(result)
 
-        unique_words = (
-            Dictionary.objects.filter(user_id=user.pk)
-            .filter(word_id=OuterRef('word_id'))
-            .order_by('word_id', '-date_added')
-            .values('id')[:1]
-        )
+    def filter_queryset(self, queryset: list):
 
-        words = Dictionary.objects.filter(
-            user_id=user.pk,
-            id__in=Subquery(unique_words)
-        ).order_by('-date_added')
-
-        return words
-
-    def filter_queryset(self, queryset: QuerySet):
-        # Получаем параметр поиска из запроса
         search_query = self.request.query_params.get( # type: ignore
-            'search', None)
-
-        if search_query:
-            queryset = queryset.filter(
-                Q(word__text__icontains=search_query) |
-                Q(translation__text__icontains=search_query)
-            )
-        return super().filter_queryset(queryset)
+            'search', None
+        )
+        
+        filtered_queryset = []
+        
+        if search_query:   
+            for item in queryset:
+                if search_query in item['word_text']:
+                    filtered_queryset.append(item)        
+            return filtered_queryset
+        
+        return queryset
+        
+        
 
 
 class VocabularyDelete(generics.DestroyAPIView, Vocabulary):
