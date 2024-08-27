@@ -24,7 +24,12 @@ class BaseTrainingListSerializer(serializers.ModelSerializer):
         data = cast(dict, serializers.data) 
 
         data.update({'translation': obj.translation.text}) 
-        data.update({'part_of_speech': obj.translation.part_of_speech.text}) 
+        part_of_speech = obj.translation.part_of_speech
+        
+        if part_of_speech:
+            data.update({'part_of_speech': part_of_speech.text}) 
+        else:
+            data.update({'part_of_speech': None}) 
         
         return data
 
