@@ -1,5 +1,7 @@
 from rest_framework import permissions
 
+from apps.book.models import Book
+
 class IsOwnerOrReadOnly(permissions.BasePermission):
     """
     Пользовательское разрешение, которое позволяет владельцу объекта редактировать его,
@@ -13,8 +15,17 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
             return True
 
         # Разрешение на запись разрешено только владельцу объекта.
-        
-        try:
-            return obj.user == request.user
-        except AttributeError:
+        if isinstance(obj, Book):
             return obj.author_upload == request.user
+        
+        return obj.user == request.user
+
+class IsNotPrivetOrOwner(permissions.BasePermission):
+    
+    
+    def has_object_permission(self, request, view, obj: Book):
+        if obj.author_upload == request.user:
+            return True
+        elif not obj.is_privet:
+            return True
+            

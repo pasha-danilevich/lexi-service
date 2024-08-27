@@ -22,8 +22,11 @@ def _get_page_from_context(context: dict[str, HttpRequest]) -> int:
     Returns:
         int: Номер страницы, извлеченный из контекста. Нумерация начинается с 0.
     """
-    full_path = context['request'].get_full_path()
-    page = int(full_path.split('/')[-1]) - 1
+    
+    url = context['request'].get_full_path()
+    parts = list(filter(bool, url.split('/')))
+    page = int(parts[-1]) - 1
+    
     return page
 
 def get_start_end(context, obj: Book):
@@ -51,11 +54,11 @@ def get_start_end(context, obj: Book):
     return (start, end)
 
 @overload
-def get_user_bookmark(obj, user: AnonymousUser) -> None:
+def get_user_bookmark(obj: Book, user: AnonymousUser) -> None:
     ...
 
 @overload
-def get_user_bookmark(obj, user: User) -> Dict[str, int]:
+def get_user_bookmark(obj: Book, user: User) -> Dict[str, int]:
     ...
 
 def get_user_bookmark(obj, user):

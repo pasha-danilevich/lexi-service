@@ -1,22 +1,22 @@
 from typing import cast
-from django.db import transaction
 
+from django.db import connection
+from django.db import transaction
 from django.http import Http404
-from django.db.models import Subquery, OuterRef, QuerySet
+from django.db.models import QuerySet, Q
 
 from rest_framework import generics,  status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
+from apps.api.v1.vocabulary.sql import VOCABULARY_QUERY
 from apps.user.models import User
-from apps.word.managers import DictionaryQuerySet
+from apps.word.models import Dictionary
+from config.settings import TRAINING_TYPES
 
-from .services import create_traning_for_word, get_words_count_on_levels
+from .services import create_traning_for_word, make_dict
 from .serializers import DictionarySerializer, DictionaryListSerializer
 from .pagination import VocabularyPageNumberPagination
-from apps.word.models import Dictionary, Training
-
-from config.settings import TRAINING_TYPES, TRAINING_TYPES_ID
 
 
 class Vocabulary(generics.GenericAPIView):
@@ -31,10 +31,12 @@ class Vocabulary(generics.GenericAPIView):
         elif self.request.method == 'GET':
             return DictionaryListSerializer
         return self.serializer_class
+
     def get_user(self):
         user = cast(User, self.request.user)
-        
+
         return user
+
     def get_queryset(self):
         user = self.get_user()
         user_id: int = user.pk
@@ -70,29 +72,35 @@ class VocabularyListCreate(generics.ListCreateAPIView, Vocabulary):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
-
+    
     def get_queryset(self):
-
         user = self.request.user
+        
+        divisor = len(TRAINING_TYPES) # кол-во типов тренировок будет делителем для того, чтобы получить средний уровень для слова
+        
+        with connection.cursor() as cursor:
+            cursor.execute(VOCABULARY_QUERY, [divisor, user.pk])
+            result = cursor.fetchall()
+            
+        return make_dict(result)
 
-        unique_words = (
-            Dictionary.objects.filter(user_id=user.pk)
-            .filter(word_id=OuterRef('word_id'))
-            .order_by('word_id', '-date_added')
-            .values('id')[:1]
+    def filter_queryset(self, queryset: list):
+
+        search_query = self.request.query_params.get( # type: ignore
+            'search', None
         )
         
-        words = Dictionary.objects.filter(
-            user_id=user.pk,
-            id__in=Subquery(unique_words)
-        ).order_by('-date_added')
-
-        return words
+        filtered_queryset = []
         
-
-
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        if search_query:   
+            for item in queryset:
+                if search_query in item['word_text']:
+                    filtered_queryset.append(item)        
+            return filtered_queryset
+        
+        return queryset
+        
+        
 
 
 class VocabularyDelete(generics.DestroyAPIView, Vocabulary):
@@ -105,39 +113,3 @@ class VocabularyDelete(generics.DestroyAPIView, Vocabulary):
             details = f'Связь {data} не найдена'
             raise Http404(details)
         return instance
-
-
-class VocabularyStats(generics.ListAPIView, Vocabulary):
-
-    def get_value(
-        self, 
-        type_id: int, 
-        dictionary: DictionaryQuerySet, 
-        levels_length: int
-    ):
-        training_list = []
-
-        for word in dictionary:
-            word: Dictionary
-            word_trainig = cast(QuerySet[Training], word.training)
-            
-            training_list.extend(word_trainig.filter(type_id=type_id))
-
-        value = get_words_count_on_levels(
-            levels_length=levels_length,
-            training_list=training_list
-        )
-        
-        return value
-
-    def list(self, *args, **kwargs):
-        user = cast(User, self.request.user)
-        levels_length = len(user.settings.levels)
-        dictionary = self.get_queryset()
-
-        data = {
-            type_name: self.get_value(type_id, dictionary, levels_length) 
-            for type_name, type_id in TRAINING_TYPES_ID.items()
-        }
-
-        return Response(data, status=status.HTTP_200_OK)

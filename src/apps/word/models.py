@@ -45,9 +45,9 @@ class Word(models.Model):
         null=True
     )
 
-    translations: 'Translation | models.QuerySet[Translation]'
-    synonyms: 'Synonym | models.QuerySet[Synonym]'
-    meanings: 'Meaning | models.QuerySet[Meaning]'
+    translations: 'models.QuerySet[Translation]'
+    synonyms: 'models.QuerySet[Synonym]'
+    meanings: 'models.QuerySet[Meaning]'
     dictionary: 'DictionaryQuerySet'
 
     def __str__(self):
