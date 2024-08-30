@@ -79,14 +79,24 @@ class TrainingListUpdate(TrainingView, generics.ListAPIView, mixins.UpdateModelM
         user = self.get_user()
         self.current_type = self.get_type()
         type_id = TRAINING_TYPES_ID[self.current_type]
-        count_word_in_round = user.settings.count_word_in_round
-
-        queryset = Dictionary.objects.all(user.pk)
-        user_dictionary = queryset.current(type_id=type_id)[
-            :count_word_in_round]
-
-        serializer = self.get_serializer(user_dictionary, **kwargs, many=True)
-
+        
+        results = Dictionary.objects.all(
+            user.pk
+        ).current(
+            type_id
+        ).select_related(
+            'word', 'translation', 'word__part_of_speech'
+        ).values(
+            'word__text',
+            'word__transcription',
+            'translation__text',
+            'word__part_of_speech__text',
+            'training__id',
+            'training__lvl'
+        )[:user.settings.count_word_in_round]
+        
+        serializer = self.get_serializer(results, **kwargs, many=True)
+        
         if serializer.data:
             return Response(serializer.data)
         else:

@@ -80,6 +80,8 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 
 DATABASE_URL = os.getenv("DATABASE_URL", '')
+# external
+# DATABASE_URL = "postgresql://lexi_user:9zK5UiKVROXr9Llle1ecGFcAZ35UEZmP@dpg-cquhrq88fa8c73fm3hmg-a.frankfurt-postgres.render.com/lexi"
 DATABASES = {
     'default': dj_database_url.parse(DATABASE_URL)
 }

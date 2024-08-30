@@ -24,7 +24,14 @@ class DictionaryQuerySet(models.QuerySet):
         )
 
     def current(self, type_id):
-        # self это список Dictionary
+        """ Актульные слова для тренировки
+
+        Args:
+            type_id (_type_): Тип тренировки
+
+        Returns:
+            DictionaryQuerySet: Список тренировок
+        """
         time = get_current_unix_time()
         return self.filter(
             training__type_id=type_id,

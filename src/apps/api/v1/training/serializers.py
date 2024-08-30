@@ -1,39 +1,54 @@
-from typing import cast
 from rest_framework import serializers
-from apps.api.v1.training.services import get_false_set
-from apps.word.models import Dictionary, Training, Word
-from apps.api.v1.word.serializers import WordSerializer
+
+from apps.api.v1.training.false_set import FalseSet
+from apps.word.models import Training
+
 
 class TrainingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Training
         fields = ["pk", "lvl"]
-        
-class BaseTrainingListSerializer(serializers.ModelSerializer):
-    word = serializers.SerializerMethodField()
-    training = serializers.SerializerMethodField()
+
+
+class BaseTrainingListSerializer(serializers.Serializer):
+    word_text = serializers.CharField(source='word__text')
+    word_transcription = serializers.CharField(source='word__transcription')
+    translation_text = serializers.CharField(source='translation__text')
+    part_of_speech_text = serializers.CharField(
+        source='word__part_of_speech__text')
+    training_id = serializers.IntegerField(source='training__id')
+    training_lvl = serializers.IntegerField(source='training__lvl')
 
     class Meta:
-        model = Dictionary
-        fields = ["pk", "word", "training"]
+        fields = [
+            "word_text",
+            "word_transcription",
+            "translation_text",
+            "part_of_speech_text",
+            "training_id",
+            "training_lvl"
+        ]
 
-    def get_word(self, obj: Dictionary):
-        word = cast(Word, obj.word)
-        fields = ('pk', 'text', 'transcription')
-        serializers = WordSerializer(word, fields=fields)
-        data = cast(dict, serializers.data) 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        new_representation = {
+            "word": {
+                "text": representation["word_text"],
+                "translation": representation["translation_text"],
+                "transcription": representation["word_transcription"],
+                "part_of_speech": representation["part_of_speech_text"],
+            },
+            "training": {
+                "pk": representation["training_id"],
+                "lvl": representation["training_lvl"],
+            }
+        }
+        false_set = representation.get("false_set", None)
+        if false_set:
+            new_representation.update(
+                {"false_set": representation["false_set"]})
 
-        data.update({'translation': obj.translation.text}) 
-        data.update({'part_of_speech': obj.translation.part_of_speech.text}) 
-        
-        return data
-
-    def get_training(self, obj):
-        training = obj.training.get(type_id=self.context['type_id'])
-        serializers = TrainingSerializer(training)
-        data = serializers.data
-        
-        return data
+        return new_representation
 
 
 class ReproduceListSerializer(BaseTrainingListSerializer):
@@ -48,13 +63,19 @@ class RecognizeListSerializer(BaseTrainingListSerializer):
     class Meta(BaseTrainingListSerializer.Meta):
         fields = BaseTrainingListSerializer.Meta.fields + ["false_set"]
 
-    def get_false_set(self, obj: Dictionary):
-        word = cast(Word, obj.word)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.false_set_obj = FalseSet(
+            queryset=args[0],
+            word_count=self.context.get('number_of_false_set', 2)
+        )
 
-        kwargs = {
-            "instance": word,
-            "part_of_speech": word.part_of_speech,
-            "number_of_false_set": self.context.get('number_of_false_set', False)
-        }
+    def get_false_set(self, obj: dict):
 
-        return get_false_set(**kwargs)
+        word_pos = obj['word__part_of_speech__text']
+        false_set_list = self.false_set_obj.get_list_false_set_word(
+            pos=word_pos
+        )
+
+        return false_set_list
+
