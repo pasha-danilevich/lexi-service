@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'apps.word',
     'apps.custom_email',
     'apps.api.v1.dev',
+    'apps.analytics',
 
     'rest_framework',
     'corsheaders',
