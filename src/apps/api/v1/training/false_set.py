@@ -1,6 +1,7 @@
 import random
 
-from django.db.models import Count
+from django.db.models import F, Count
+from apps.analytics.models import CountPartOfSpeech
 from apps.word.models import PartOfSpeech, Translation
 
 
@@ -57,13 +58,28 @@ class FalseSet():
         return pos_id
     
     def _count_pos_bd(self, counted_pos_word: dict[str, int]):
-        result = {
-            k: v 
-            for k, v in PartOfSpeech.objects
-                .filter(text__in=counted_pos_word.keys())
-                .annotate(word_count=Count('translations__id'))  # Исправлено здесь
-                .values_list('text', 'word_count')
-        }
+
+        analitics_count = (CountPartOfSpeech.objects
+            .filter(part_of_speech_id__text__in=counted_pos_word.keys())
+            .annotate(text=F('part_of_speech__text'))
+            .values_list('text', 'count')
+        )
+        
+        
+        
+        if analitics_count:
+            result = {
+                k: v 
+                for k, v in analitics_count
+            }
+        else:
+            result = {
+                k: v 
+                for k, v in PartOfSpeech.objects
+                    .filter(text__in=counted_pos_word.keys())
+                    .annotate(word_count=Count('translations__id'))  # Исправлено здесь
+                    .values_list('text', 'word_count')
+            }
         return dict(result)
     
     def _get_false_set_by_pos(
@@ -109,5 +125,4 @@ class FalseSet():
                     key='сущ'
                 )
             list_false_set_word.append(word)
-        print(self.false_set_by_pos)
         return list_false_set_word

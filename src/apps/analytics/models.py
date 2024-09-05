@@ -17,4 +17,4 @@ class CountPartOfSpeech(models.Model):
     
 
     def __str__(self) -> str:
-        return f"CountPartOfSpeech for {self.part_of_speech.text} created on {self.date_create.strftime('%Y-%m-%d %H:%M:%S')}" # type: ignore
+        return f"{self.part_of_speech.text} - {self.count}" # type: ignore
