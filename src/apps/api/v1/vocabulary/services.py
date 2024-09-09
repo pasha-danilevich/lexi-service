@@ -32,3 +32,30 @@ def make_dict(tulple_list: list[tuple[Any, ...]]) -> list[dict[str, Any]]:
         for item in tulple_list
     ]  
     return dict_result
+
+
+def get_params_dict(params) -> dict[str, Any]:
+    result = {}
+    
+    order = params.get('order', None) 
+    if order:
+        result.update({'order': order})
+    
+    direction = params.get('direction', None) 
+    if direction:
+        result.update({'direction': direction})
+
+    filter: list = params.getlist('filter')
+    value: list = params.getlist('value') 
+    
+    # Проверяем, что длины массивов совпадают и они не пустые
+    if len(filter) != len(value):
+        raise ValueError("Кол-во параметров filter и value не совпадают. Параметры filter и value надо передавать вместе")
+        
+    
+    if filter and value:
+        result.update({'filter': filter})
+        result.update({'value': value})
+     
+    return result
+    

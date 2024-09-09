@@ -9,12 +9,12 @@ from rest_framework import generics,  status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
-from apps.api.v1.vocabulary.sql import VOCABULARY_QUERY
+from apps.api.v1.vocabulary.sql import get_query
 from apps.user.models import User
 from apps.word.models import Dictionary
 from config.settings import TRAINING_TYPES
 
-from .services import create_traning_for_word, make_dict
+from .services import create_traning_for_word, get_params_dict, make_dict
 from .serializers import DictionarySerializer, DictionaryListSerializer
 from .pagination import VocabularyPageNumberPagination
 
@@ -78,8 +78,10 @@ class VocabularyListCreate(generics.ListCreateAPIView, Vocabulary):
         
         divisor = len(TRAINING_TYPES) # кол-во типов тренировок будет делителем для того, чтобы получить средний уровень для слова
         
+        params = get_params_dict(self.request.query_params)  # type: ignore
+        
         with connection.cursor() as cursor:
-            cursor.execute(VOCABULARY_QUERY, [divisor, user.pk])
+            cursor.execute(get_query(**params), [divisor, user.pk])
             result = cursor.fetchall()
             
         return make_dict(result)
