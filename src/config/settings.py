@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import dj_database_url
 import os
 
-load_dotenv()
+load_dotenv(override=True)
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -18,6 +18,7 @@ SITE_URL = os.getenv("SITE_URL", '')
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", '').split(' ')
 DOMAIN = os.getenv("DOMAIN", '')
 SERVER_DOMAIN = os.getenv("SERVER_DOMAIN", '')
+PING = os.getenv("PING", 'false').lower() == 'true'
 
 CORS_ALLOWED_ORIGINS = [
     f"http://{DOMAIN}",
@@ -81,8 +82,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 
 DATABASE_URL = os.getenv("DATABASE_URL", '')
-# external
-# DATABASE_URL = "postgresql://lexi_user:9zK5UiKVROXr9Llle1ecGFcAZ35UEZmP@dpg-cquhrq88fa8c73fm3hmg-a.frankfurt-postgres.render.com/lexi"
+
 DATABASES = {
     'default': dj_database_url.parse(DATABASE_URL)
 }

@@ -1,6 +1,6 @@
 import requests
 import time
-from config.settings import SERVER_DOMAIN
+from config.settings import PING, SERVER_DOMAIN
 
 import requests
 import time
@@ -13,6 +13,9 @@ def ping_server():
     global is_pinging
     
     if SERVER_DOMAIN == 'localhost:8000':
+        return
+    
+    if not PING:
         return
     
     while True:
