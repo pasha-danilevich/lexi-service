@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from apps.api.v1.word.serializers import Word, WordSerializer
 from apps.user.models import User
 
-from .services import get_related_pk, clean_string, get_or_create_word
+from .services import get_related_pk, clean_string, get_or_create_word, google_translater
 
 class WordGeneric(generics.GenericAPIView):
     queryset = Word.objects.all()
@@ -81,13 +81,8 @@ def googletrans(request):
     if not text:
         return Response(data='Текст не передан', status=status.HTTP_400_BAD_REQUEST)
 
-    dest_language = request.data.get('dest_language', 'ru')
-
-    translator = Translator()
-
     try:
-        translation = translator.translate(text, dest=dest_language)
-        translated_text = translation.text # type: ignore
+        translated_text = google_translater(text)
         return Response({'translated_text': translated_text}, status=status.HTTP_200_OK)
     except Exception as e:
         return Response({'error': f"Translation error: {e}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
